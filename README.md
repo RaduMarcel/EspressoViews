@@ -1,5 +1,6 @@
 # EspressoViews-
-SQL-based reporting tool for highly complex data structure. Express your own view. 
+Slim SQL-based reporting tool for highly complex data structure. 
+Express your own view. 
 
 - ### Description:
 A description of your project follows. A good description is clear, short, and to the point. Describe the importance of your project, and what it does.
