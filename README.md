@@ -54,7 +54,7 @@ This definition file is made of your SQLs queries and of instructions, which spe
 
 **2. The connection credentials for the (Oracle or MySQL) database server where the report definition file should be ran.**
 
-The `EspressoViews.zip` file contains the JDBC driver packages for the suported database server. They are placed in the folder `EspressoViews_lib`. The provided JDBC diver for Oracle databases works with the Oracle Versions 11.2 and 12.1 and the JDBC driver for MySQL databases works at least with the MySQL version 5.1.42.
+The `EspressoViews.zip` file contains the JDBC driver packages for the suported database server. They are placed in the folder `EspressoViews_lib`. The provided JDBC diver for Oracle databases works with the Oracle Versions 11.2 and 12.1 and the JDBC driver for MySQL databases works at least with the MySQL versions from 5.1 to 5.7
 These drivers can be also downloaded in internet and you should do so if the version provided is not compatible with the database system version you try to access.
 When you replace the JDBC driver packages then make sure the new driver file name is also referenced in the path defintion in MANIFEST.MF file of the `EspressoViews.jar` package.  
 
