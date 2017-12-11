@@ -47,14 +47,16 @@ Now, to use and generate an EspressoViews report you need further:
 
 **1. An XML report definition file.**
 
-This definition file is made of your SQLs queries and of instructions, which specify how to organize and display the data retrieved with these SQL queries. To see how such an EspressoViews definition is created please read first the [these introductory words on how to define an Espresso Views report][ReportDef] and then [the XML report definition syntax][ReportSyntax]
+This definition file is made of your SQLs queries and of instructions, which specify how to organize and display the data retrieved with these SQL queries. To see how such an EspressoViews definition is created please read first [these introductory words on how to define an Espresso Views report][ReportDef] and then [the XML report definition syntax][ReportSyntax]
 
 [ReportDef]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
 [ReportSyntax]: https://github.com/RaduMarcel/EspressoViews-/wiki/4.-The-XML-report-definition-syntax
 
 **2. The connection credentials for the (Oracle or MySQL) database server where the report definition file should be ran.**
 
-The `EspressoViews.zip` file contains JDBC driver packages for the suported database server. They are placed in the folder `EspressoViews_lib`. These drivers can be also downloaded in internet and you should do so if the version provided is not compatible with database system version you try to access. When you replace the JDBC driver packages then make sure the new driver file name is also referenced in the path defintion in MANIFEST.MF file of the `EspressoViews.jar` package.  
+The `EspressoViews.zip` file contains the JDBC driver packages for the suported database server. They are placed in the folder `EspressoViews_lib`. The provided JDBC diver for Oracle databases works with the Oracle Versions 11.2 and 12.1 and the JDBC driver for MySQL databases works at least with the MySQL version 5.1.42.
+These drivers can be also downloaded in internet and you should do so if the version provided is not compatible with the database system version you try to access.
+When you replace the JDBC driver packages then make sure the new driver file name is also referenced in the path defintion in MANIFEST.MF file of the `EspressoViews.jar` package.  
 
 
 **3. Press the OK Button on the bottom to generate the report**
@@ -65,7 +67,7 @@ The `EspressoViews.zip` file contains JDBC driver packages for the suported data
 ## Credits: 
 Espresso Views, Version 0.5
 
-Copyright © Radu-Marcel Dumitru
+Copyright © Radu-Marcel Dumitru, Marburg, Germany
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU GENERAL PUBLIC LICENSE, Version 3 as published by the Free Software Foundation on 29 June 2007
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
