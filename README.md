@@ -67,7 +67,7 @@ When you replace the JDBC driver packages then make sure the new driver file nam
 ## Credits: 
 Espresso Views, Version 0.5
 
-Copyright © Radu-Marcel Dumitru, Marburg, Germany
+Copyright © Radu-Marcel Dumitru
 
 This program is free software; you can redistribute it and/or modify it under the terms of the GNU GENERAL PUBLIC LICENSE, Version 3 as published by the Free Software Foundation on 29 June 2007
 This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. 
