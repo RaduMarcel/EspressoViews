@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info" name="logicalExecutionLog">
+<Appenders>
+
+<Console name="Console" target="SYSTEM_OUT">
+<PatternLayout pattern="%d %p %c{1.} [%t] %-5level %logger{36} - %msg%n"/>
+</Console>
+
+<RollingFile name="LogFile" fileName="logs/execLog.log" bufferedIO="true" 
+filePattern="logs/$${date:yyyy-MM}/execLog-%d{yyyy-MM}-%i.log.gz">
+<PatternLayout>
+<Pattern>%d %p %c{1.} [%t] %m%n</Pattern>
+</PatternLayout>
+<Policies>
+<OnStartupTriggeringPolicy />
+<SizeBasedTriggeringPolicy size="20 MB" />
+<TimeBasedTriggeringPolicy />
+</Policies>
+<DefaultRolloverStrategy max="10"/>
+</RollingFile>
+
+</Appenders>
+<Loggers>
+<Logger name="aufDemSchrim" level="off" additivity="false">
+<AppenderRef ref="Console"/>
+</Logger>
+<Root level="info">
+<AppenderRef ref="LogFile"/>
+</Root>
+</Loggers>
+</Configuration>
