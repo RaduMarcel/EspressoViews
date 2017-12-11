@@ -40,6 +40,8 @@ Then download the EspressoViews file `EspressoViews.zip`, unpack it in a new fol
 
 ![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsInstall.png)
 
+
+
 Now, to use and generate an EspressoViews report you need further:
 
 **1. An XML report definition file.**
@@ -52,6 +54,10 @@ This definition file is made of your SQLs queries and of instructions, which spe
 **2. The connection credentials for the (Oracle or MySQL) database server where the report definition file should be ran.**
 
 The `EspressoViews.zip` file contains JDBC driver packages for the suported database server. They are placed in the folder `EspressoViews_lib`. These drivers can be also downloaded in internet and you should do so if the version provided is not compatible with database system version you try to access. When you replace the JDBC driver packages then make sure the new driver file name is also referenced in the path defintion in MANIFEST.MF file of the `EspressoViews.jar` package.  
+
+
+**3. Press the OK Button on the bottom to generate the report**
+
 
 
 
