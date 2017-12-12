@@ -35,14 +35,27 @@ This tool is a dwarf standing on the shoulders of RDBMS giants.
 
 ## What should I do to give it a try?
 
-You need first to have Java installed on your machine (version 1.6 upwards).
-Then download the EspressoViews file `EspressoViews.zip`, unpack it in a new folder and start the application with the Java runnable file `EspressoViews.jar`. You should be able to see this database log-in dialog:
+You need first to have a Java Runtime installed installed on your machine (version 1.6 or higher).
+To do a quick check type in the command line:
+```
+java -version
+```
+Download and install a newer Java version (https://java.com/de/download/). 
+If you know that you have the right version but the Java executable was not found, then make sure the Java PATH system variable is set correctly (see more: https://www.java.com/en/download/help/path.xml).
+
+
+Then download the EspressoViews file `EspressoViews.zip` and unpack it in an own folder. The application is started either by double-klicking Java runnable file `EspressoViews.jar` or by typing in the command line 
+```
+java -jar EspressoViews.jar
+```
+
+If the application has started correctly, then you should be able to see this database log-in dialog:
 
 ![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsInstall.png)
 
 
 
-Now, to use and generate an EspressoViews report you need further:
+Now, to use and generate an EspressoViews report you need:
 
 **1. An XML report definition file.**
 
