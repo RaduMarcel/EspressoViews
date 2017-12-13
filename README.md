@@ -1,4 +1,4 @@
-# EspressoViews-
+# EspressoViews
 Slim SQL-based reporting tool for highly complex data structure. 
  
 
@@ -40,8 +40,8 @@ To do a quick check type in the command line:
 ```
 java -version
 ```
-Download and install a newer Java version (https://java.com/de/download/). 
-If you know that you have the right version but the Java executable was not found, then make sure the Java PATH system variable is set correctly (see more: https://www.java.com/en/download/help/path.xml).
+If the version is lower or your system does not have Java then please download and install a newer Java version (https://java.com/de/download/). 
+If you know that you have the right version but the Java executable was not found from the command line, then make sure the Java PATH system variable is set correctly (see more: https://www.java.com/en/download/help/path.xml).
 
 
 Then download the EspressoViews file `EspressoViews.zip` and unpack it in an own folder. The application is started either by double-klicking Java runnable file `EspressoViews.jar` or by typing in the command line 
