@@ -74,7 +74,9 @@ When you replace the JDBC driver packages then make sure the new driver file nam
 **3. Press the OK Button on the bottom to generate the report**
 
 
+## Contributing
 
+To be continued
 
 ## Credits: 
 Espresso Views, Version 0.5
