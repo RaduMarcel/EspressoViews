@@ -1,5 +1,5 @@
 # EspressoViews
-Slim SQL-based reporting tool for highly complex data structure. 
+Slim SQL-based reporting and data analysis tool. The best approach for complex data structures 
  
 
 ## **What is this tool used for?**
