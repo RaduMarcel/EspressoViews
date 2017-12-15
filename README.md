@@ -35,7 +35,7 @@ This tool is a dwarf standing on the shoulders of RDBMS giants.
 
 ## What should I do to give it a try?
 
-You need first to have a Java Runtime installed installed on your machine (version 1.6 or higher).
+You need first to have a Java Runtime installed installed on your machine (version 1.8 or higher).
 To do a quick check type in the command line:
 ```
 java -version
