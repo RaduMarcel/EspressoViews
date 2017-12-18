@@ -1,4 +1,3 @@
-import java.awt.ComponentOrientation;
 import java.awt.FlowLayout;
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -10,11 +9,8 @@ import javax.swing.JTextField;
 import javax.swing.DropMode;
 import javax.swing.SwingConstants;
 import java.awt.Color;
-
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
-import javax.swing.JList;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JPasswordField;
 import javax.swing.JLabel;
@@ -32,18 +28,17 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.time.LocalTime;
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-
 import javax.swing.BoxLayout;
 import java.awt.event.ActionListener;
 import org.apache.logging.log4j.*;
-import java.awt.Component;
 /**
  * TODO
 
@@ -67,16 +62,8 @@ NEUES
 - Verbindungen zu neuen Datenbanken erlauben !! 
   Als nächstes: Microsoft SQL Server
   
-- die inherited columns werden auf Gleichheit geprüft, mit einem wildkey, zB *, in column der Kindzeile könnte man etwas ähnliches wie eine Oder-Operation einführen!!!
-  was sollte man dann weiter nach unten vererben, den Wert mit oder ohne wildkey?
-  replaceAll("\\*", ".*").replaceAll("%", ".*")       
 
 - Den tag <RollUp> column_name_1,column_name_2,... </RollUp> einführen !
-
-- Als subQuery soll der locator einer weiteren XML-Definitionsdatei angegeben werden können, die dann natürlich selbst andere subqueries haben kann OK
-  Zusätzliche Option: die letzte SQLdefinition ist der neue parent für alle untergeordnenten SQLdefinitonen !    
-  
-- Im tag <SQLQuery>  sollte ein file locator angegeben werden können, damit grosse SQLs die Übersichtlichkeit der Definition nicht beeinträchtigen!!
 
   
 - Namen der temporären Tabellen nach dem Erzeugen im ini file schreiben + die dazugehörige db connection. Nach dem Droppen auch von dort wieder löschen (anstelle des createdTables Set). 
@@ -104,7 +91,7 @@ Swinglastig:
   Aber wenn das Datenfenster mit dem X-Button geschlossen wird, bleibt das Logindialog denoch invisible. X-Button wurde ausgeschlatet, aber dies ist nicht die beste Lösung !!   
 
 Sonst:
-- Tutorial schreiben !!!
+
 
 - icon kreieren !!
 
@@ -130,9 +117,16 @@ ZUKUNFTSMUSIK
 
 
 -------------------------------DONE!-------------------------------
+- die inherited columns werden auf Gleichheit geprüft, mit einem wildkey, zB *, in column der Kindzeile könnte man etwas ähnliches wie eine Oder-Operation einführen!!!
+  was sollte man dann weiter nach unten vererben, den Wert mit oder ohne wildkey?
+  replaceAll("\\*", ".*").replaceAll("%", ".*")       
+
+- Als subQuery soll der locator einer weiteren XML-Definitionsdatei angegeben werden können, die dann natürlich selbst andere subqueries haben kann OK  
+- Im tag <SQLQuery>  sollte ein file locator angegeben werden können, damit grosse SQLs die Übersichtlichkeit der Definition nicht beeinträchtigen!!
 - In einem <SubQueryLocator> kann man mehrere report definition files einfügen.
 
 - GPL 3 Lizenz 
+- Tutorial schreiben !!!
 
 - Verbindungen zu anderen Datenbanken als Oracle erlauben !! 
   DONE MySQL und Oracle
@@ -800,7 +794,7 @@ public static void main(String[] args) {
 						if (newConnectionNameEntered==true  ){//Ab hier muss der connection name neu oder leer sein 
 							//System.out.println("Element "+comboBoxStoredConns.getModel().getSelectedItem()+" is neu.
 							if (newConnDet.get("CONNECTIONNAME").trim().length()==0){//wenn der ConnectionName nicht eingegeben wurde, wird er auf username + service name zusammengesetzt
-								newConnDet.put("CONNECTIONNAME",newConnDet.get("USERNAME")+" on "+newConnDet.get("SERVICENAME")+" "+ LocalTime.now().getNano());
+								newConnDet.put("CONNECTIONNAME",newConnDet.get("USERNAME")+" on "+newConnDet.get("SERVICENAME")+" "+(new SimpleDateFormat("hmmss").format(new Date())) );
 								connectionName=newConnDet.get("CONNECTIONNAME");
 							}
 							
@@ -833,7 +827,7 @@ public static void main(String[] args) {
 							if(newConnDetailsEntered)
 								{
 								if (newConnDet.get("CONNECTIONNAME").trim().length()==0){//wenn der ConnectionName nicht eingegeben wurde, wird er auf username + service name zusammengesetzt
-									newConnDet.put("CONNECTIONNAME",newConnDet.get("USERNAME")+" on "+newConnDet.get("SERVICENAME")+" "+ LocalTime.now().getNano());
+									newConnDet.put("CONNECTIONNAME",newConnDet.get("USERNAME")+" on "+newConnDet.get("SERVICENAME")+" "+ (new SimpleDateFormat("hmmss").format(new Date())) );
 									connectionName=newConnDet.get("CONNECTIONNAME");
 								}
 									//System.out.println("Erzeuge eine neue Connection mit Namen "+comboBoxStoredConns.getModel().getSelectedItem()+" und den Verbindungs details "+host+" "+serviceName+" "+userName);

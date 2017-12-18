@@ -1,9 +1,7 @@
 import java.util.*;
 import java.io.PrintStream;
 import java.sql.*;
-
 import javax.swing.JTextArea;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 public class AnfragePlan {

@@ -1,14 +1,14 @@
 import java.sql.*;
-import java.time.LocalTime;
-import java.time.temporal.ChronoField;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.awt.event.*;
+
 import javax.swing.border.BevelBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.border.SoftBevelBorder;
@@ -260,7 +260,7 @@ JTree tree = null;
 
 //Daten werden abgefragt und der Datenbaum wird erzeugt  
 txtProgressgMessage.setText("Processing the report definition file "+file+" on datatabase connection "+ connectionName+"...\n\n");
-LocalTime startTime =  LocalTime.now();  
+long startTime =  new Date().getTime();  
 if (refreshFlag){
 conn = DBConnections.getNewConnection(dbType,serviceName, host, port, connType,userName, password);
 if (conn==null) {
@@ -307,8 +307,8 @@ txtProgressgMessage.append("Successfully connected to the datatabase.\n");
 		return new JScrollPane(txtProgressgMessage); 			
 	}	
 }
-LocalTime defintionFileParsed =  LocalTime.now();
-txtProgressgMessage.append("Report definition file was loaded and validated in "+( (float)(defintionFileParsed.getLong(ChronoField.MILLI_OF_DAY ) - startTime.getLong(ChronoField.MILLI_OF_DAY)) /1000)+" seconds\n");
+long defintionFileParsed =  new Date().getTime();
+txtProgressgMessage.append("Report definition file was loaded and validated in "+( (float)(defintionFileParsed - startTime) /1000)+" seconds\n");
 txtProgressgMessage.append("Begin to query the datatabase\n");
 	
 	if (refreshFlag){
@@ -345,8 +345,8 @@ txtProgressgMessage.append("Begin to query the datatabase\n");
 		return new JScrollPane(txtProgressgMessage); 	
 	}
 }
-LocalTime dataRetrivalFinished =  LocalTime.now();	
-txtProgressgMessage.append("Database retrieval ended without errors in "+((float)(dataRetrivalFinished.getLong(ChronoField.MILLI_OF_DAY ) - defintionFileParsed.getLong(ChronoField.MILLI_OF_DAY ))/1000)+" seconds\n");
+long dataRetrivalFinished =  new Date().getTime();	
+txtProgressgMessage.append("Database retrieval ended without errors in "+((float)(dataRetrivalFinished - defintionFileParsed)/1000)+" seconds\n");
 logger.info("Data display phase starts producing the view option "+viewOption);
 txtProgressgMessage.append("Start to generate the report display.\n");
 //An diesem Punkt existiert eine Anfrage-hierarchie mit angehängten Datenblöcken. Ab jetzt werden die einzelnen Datenzeilen zu einem Datenbaum verschachtelt.  
@@ -359,9 +359,9 @@ txtProgressgMessage.append("Start to generate the report display.\n");
 			wurzel = DisplayData.generateStructDisplay(allePlaene.get(0),"Overview of the definition file "+file,viewOption);
 			logger.info("Generated raw data for the overview of the definition file "+file,viewOption);
 		}
-LocalTime dataTreeGenerated =  LocalTime.now();		
+long dataTreeGenerated =  new Date().getTime();		
 		int[] totalChildren = DataNode.getTreeNodeCount(wurzel.getNextNode());
-		txtProgressgMessage.append("Data tree generated in "+(float)(dataTreeGenerated.getLong(ChronoField.MILLI_OF_DAY )-dataRetrivalFinished.getLong(ChronoField.MILLI_OF_DAY))/1000  +" seconds\n");
+		txtProgressgMessage.append("Data tree generated in "+(float)(dataTreeGenerated-dataRetrivalFinished)/1000  +" seconds\n");
 		logger.info("The generation of the graphical user interface started");
 		model = new DefaultTreeModel(wurzel);
 		tree = new JTree(model);
@@ -386,7 +386,7 @@ LocalTime dataTreeGenerated =  LocalTime.now();
 		}
 		DBConnections.dropAllTempTables();
 		tree.requestFocus();
-LocalTime GUIGenerated =  LocalTime.now();
+long GUIGenerated =  new Date().getTime();
 //		tree.addKeyListener(new KeyAdapter() {
 //			@Override
 //			public void keyPressed(KeyEvent arg0) {
@@ -405,7 +405,7 @@ LocalTime GUIGenerated =  LocalTime.now();
 		if (warnings.length()>0) 
 			warnings.insert(0, "Report validation warnings:\n\n");
 		txtwarningMessage.setText(txtProgressgMessage.getText()+"\n"+				
-				"Graphical User Interface generated in "+ (float)(GUIGenerated.getLong(ChronoField.MILLI_OF_DAY )-dataTreeGenerated.getLong(ChronoField.MILLI_OF_DAY ))/1000+" seconds.\n"+
+				"Graphical User Interface generated in "+ (float)(GUIGenerated-dataTreeGenerated)/1000+" seconds.\n"+
 				"Total number of report lines: "+totalChildren[1]+". Total number of report labels: "+totalChildren[0]+".\n\n"+warnings.toString()+
 				"\nTo increase or decrease the warning level of the report validations use the tag <WARNINGLEVEL> in iniSettings.xml and the values high or low (and restart application after each change).\nCurrent warning level is set to "+DataBaseLogin3.warningLevel);
 		
@@ -523,6 +523,13 @@ class ResultLineRenderer extends DefaultTreeCellRenderer implements TreeCellRend
 	  public ResultLineRenderer() {
 	    renderer = new JPanel(new GridLayout(0, 1));
 	    table = new JTable();
+	    table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+					System.out.println("Bäm!! "+arg0.getButton()+"  "+arg0.getLocationOnScreen());
+					System.out.println(arg0.getSource().getClass()+" "+arg0.getSource());
+			}
+		});
 	    setClosedIcon(null);
 		setOpenIcon(null);
 //		JScrollPane scrollPane = new JScrollPane(table);
