@@ -1,13 +1,9 @@
 # EspressoViews
-Slim SQL-based reporting and data analysis tool. The best approach for complex data structures 
- 
-
-## **What is this tool used for?**
 
 EspressoViews is a reporting and data analysis environment. 
 It generates fast, simple and efficient reports from a relational database (RDBMS). 
 
-In a nutshell, Espresso View merges the results of many SQL queries to one hierarchically structured result set as specified by the user in a defintion file and displays it graphically in a tree structure (comparable with a file folder structure), which can be manually expanded and collapsed:
+In a nutshell, Espresso View merges the results of many SQL queries to a hierarchically structured result as specified by the user and displays it graphically in a tree structure, which can be manually expanded and collapsed. See below an example, how a simple EspressoView report could look like:
 
 ![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsImg1.png)
 
