@@ -11,9 +11,6 @@ Currently (December 2017) it supports "only" the Oracle and MySQL database serve
 
 ## **What are the special "skills" of EspressoViews?**
 
-If you have one monolithic SQL query which retrieves everything you need or if you plan to build such a query and you are looking forward to create a report around it, then this reporting tool will not be useful for you.
-
-This tool is best suitable for use cases in which the data retrieval logic is made of a multitude of SQL queries which are regularly changing, where new queries need to be included and old queries have to be removed and/or where a high amount of data needs to be built up but without showing the users hundreds of report pages. 
 
 The core feature is the human friendly ["narrative flow" approach][Ideas] which allows you to coagulate the information retrieved by many SQL queries to a new and higher unit of sense.
 The smallest unit or module is built around a single SQL query. A report is made of at least two such SQL query units. The above example is made of three SQL query units, but theoretically there is no limitation. Any report definition, can be on his side embedded in another report definition, and so on. 
@@ -23,6 +20,12 @@ More details about this  approach you can find in the chapters [The main ideas b
 [Reportref]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
 
 The driving force to implement this report is in the first place the attempt to increase the human readability and usability of the data retrieved with SQL without reducing its complexity and/or the amount of information. 
+
+If you have one monolithic SQL query which retrieves everything you need or if you plan to build such a query and you are looking forward to create a report around it, then this reporting tool will not be useful for you.
+
+This tool is best suitable for use cases in which the data retrieval is made of a multitude of SQL queries, where at any time new queries have to be included, changed or removed. The goal of this report definition framework is not only to support the modularization of data retrieval in many interconected entities but also to induce also the SQL coders into a higher level design approach. 
+
+Every data presentation tool is "aware" that it should not overload the display with too much data. The classic approach to restrict the data shown to the user is to implement a "dialog" with the user, typically a mask, where he is asked to enter one or more parameters he interested in. The approach of this tool is to show the user first the results of the first query and the user decides which "data path" to follow further.
 
 This tool is a dwarf standing on the shoulders of RDBMS giants.
 
