@@ -7,8 +7,6 @@ In a nutshell, Espresso View merges the results of many SQL queries to a hierarc
 
 ![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsImg1.png)
 
-The result of the first query is shown in the “expanded” mode, and under each line the results of the subordinated queries can be expanded manually. Like this you follow only the stream of data you are interested in.
-
 Currently (December 2017) it supports "only" the Oracle and MySQL database servers.
 
 ## **What are the special "skills" of EspressoViews?**
