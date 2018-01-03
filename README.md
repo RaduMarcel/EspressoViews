@@ -21,13 +21,15 @@ More details about this  approach you can find in the chapters [The main ideas b
 
 
 If you have one monolithic SQL query which retrieves everything you need or if you plan to build such a query and you are looking forward to create a report around it, then this reporting tool will not be useful for you.
-
 This tool is best suitable for use cases in which the data retrieval is made of a multitude of SQL queries, where at any time new queries have to be included, changed or removed. 
-The goal of this report definition framework is not only to support the modularization of data retrieval in many loosely interconnected queries but also to induce SQL coders into a higher level design approach. 
 
-Another aim of this tool is to maintain the human readability without reducing the complexity and/or the amount of data.
+- The goal of this report definition framework is not only to support the modularization of data retrieval in many loosely interconnected queries but also to induce SQL coders into a higher level design approach. 
+
+- Another aim of this tool is to maintain the human readability without reducing the complexity and/or the amount of data.
+
 Espresso view first runs all SQL queries as specified in the report definition without prior filtering by the user. 
 The first data shown to the user is the result of the root query. Then from here the user decides which meaningful "data path" to follow further.
+
 Though, a graphical user interface for filtering prior to and after the data retrieval is still necessary in some cases and will be supported in the future as optional feature.
 
 
