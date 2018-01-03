@@ -37,6 +37,7 @@ Though, a graphical user interface for filtering prior to and after the data ret
 
 
 
+
 This tool is a dwarf standing on the shoulders of RDBMS giants.
 
 
