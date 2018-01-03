@@ -13,22 +13,24 @@ Currently (December 2017) it supports "only" the Oracle and MySQL database serve
 
 
 - The core feature is the human friendly ["narrative flow" approach][Ideas] which allows you to coagulate the information retrieved by many SQL queries to a new and higher unit of sense.
+
 The smallest unit or module is built around a single SQL query. A report is made of at least two such SQL query units. The above example is made of three SQL query units, but theoretically there is no limitation. Any report definition, can be on his side embedded in another report definition, and so on. 
 More details about this  approach you can find in the chapters [The main ideas behind this tool][Ideas] and [Defining an EspressoViews report][ReportDef]
 
 [Ideas]: https://github.com/RaduMarcel/EspressoViews-/wiki/2.-The-main-ideas-behind-this-tool
 [Reportref]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
 
+- The goal of this report definition framework is not only to support the modularization of data retrieval in many loosely interconnected queries but also to induce SQL coding into a higher level design approach. 
 
 If you have one monolithic SQL query which retrieves everything you need or if you plan to build such a query and you are looking forward to create a report around it, then this reporting tool will not be useful for you.
 This tool is best suitable for use cases in which the data retrieval is made of a multitude of SQL queries, where at any time new queries have to be included, changed or removed. 
 
-- The goal of this report definition framework is not only to support the modularization of data retrieval in many loosely interconnected queries but also to induce SQL coders into a higher level design approach. 
+
 
 - Another aim of this tool is to maintain the human readability without reducing the complexity and/or the amount of data.
 
 Espresso view first runs all SQL queries as specified in the report definition without prior filtering by the user. 
-The first data shown to the user is the result of the root query. Then from here the user decides which meaningful "data path" to follow further.
+The first data shown to the user is the result of the root query, which can be used as a summary or as an introduction for the rest of the data tree. The user then decides which meaningful "data path" to follow further.
 
 Though, a graphical user interface for filtering prior to and after the data retrieval is still necessary in some cases and will be supported in the future as optional feature.
 
