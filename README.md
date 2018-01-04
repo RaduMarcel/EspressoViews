@@ -1,27 +1,30 @@
 # EspressoViews
 
-EspressoViews is a reporting and data analysis environment. 
-It generates fast, simple and efficient reports from relational databases (RDBMS). 
+EspressoViews is a standalone Java tool for reporting and data analysis from relational databases (RDBMS).
 
-In a nutshell, Espresso View merges the results of many SQL queries to a hierarchically structured result and displays it in a tree structure, which can be manually expanded and collapsed. See below an example of a (simple) EspressoView report:
+This tool is built around a concept of defining reports made of many loosely linked SQL queries to cover vast areas of data schema and to display large amout of results in still human readable form.
 
 ![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsImg1.png)
 
-Currently (December 2017) it supports "only" the Oracle and MySQL database servers.
 
-## **What are the special "skills" of EspressoViews?**
+In a nutshell, Espresso View merges the results of many SQL queries to a hierarchically structured result and displays it in a tree structure which can be manually expanded and collapsed. 
+
+Currently it supports "only" the Oracle and MySQL database servers.
+
+
+## **Which are the concepts of EspressoViews?**
 
 
 - The core feature is the human friendly ["narrative flow" approach][Ideas] which allows you to coagulate the information retrieved by many SQL queries to a new and higher unit of sense.
 
-The smallest unit or module is built around a single SQL query. A report is made of at least two such SQL query units. The above example is made of three SQL query units, but theoretically there is no limitation. Any report definition, can be on his side embedded in another report definition, and so on. 
+The smallest unit or module is built around a single SQL query. A report is made of at least two such SQL query units. The above example is made of three SQL query units, but theoretically there is no limitation. Any report definition, can be on his side embedded in another report definition. 
 
 More details about this approach you can find in the chapters [The main ideas behind this tool][Ideas] and [Defining an EspressoViews report][ReportDef]
 
 [Ideas]: https://github.com/RaduMarcel/EspressoViews-/wiki/2.-The-main-ideas-behind-this-tool
 [Reportref]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
 
-- The goal of this report definition framework is not only to support the modularization of data retrieval in many loosely interconnected queries but also to induce SQL coding into a higher level design approach. 
+- The goal of this report definition framework is not only to support the modularization of data retrieval in many loosely linked queries but also to induce SQL coding into a higher level design approach. 
 
 If you have one monolithic SQL query which retrieves everything you need or if you plan to build such a query and you are looking forward to create a report around it, then this reporting tool will not be useful for you.
 
@@ -34,8 +37,6 @@ Espresso view first runs all SQL queries as specified in the report definition w
 The first data shown to the user is the result of the root query, which can be used as a summary or as an introduction for the rest of the data tree. The user then decides which meaningful "data path" to follow further.
 
 Though, a graphical user interface for filtering prior to and after the data retrieval is in some cases still necessary and will be supported in the future as optional features.
-
-
 
 
 This tool is a dwarf standing on the shoulders of RDBMS giants.
