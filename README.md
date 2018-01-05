@@ -7,7 +7,7 @@ This tool is built around a concept of defining reports made of many loosely lin
 ![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsImg1.png)
 
 
-In a nutshell, Espresso View merges the results of many SQL queries to a hierarchically structured result and displays it in a tree structure which can be manually expanded and collapsed. 
+In a nutshell, Espresso View merges the results of many SQL queries to a hierarchically structured result and displays it as a tree structure which can be manually expanded and collapsed. 
 
 Currently it supports "only" the Oracle and MySQL database servers.
 
