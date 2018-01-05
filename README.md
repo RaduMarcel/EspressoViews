@@ -2,7 +2,7 @@
 
 EspressoViews is a standalone Java tool for reporting and data analysis from relational databases (RDBMS).
 
-This tool is built around a concept of defining reports made of many loosely linked SQL queries to cover vast areas of data schema and to display large amout of results in still human readable form.
+This tool is built around a concept of defining reports made of many loosely linked SQL queries to cover vast areas of data schema and to display large amout of results in a human readable form.
 
 ![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsImg1.png)
 
