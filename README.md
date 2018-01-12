@@ -9,10 +9,11 @@ This tool is built around a concept whose aim is to cover vast areas of data sch
 
 In a nutshell, EspressoViews merges the results of many SQL queries to a hierarchically structured result and displays it as a tree structure which can be manually expanded and collapsed. 
 
-Check out the [Wiki-pages][Ideas] to learn more.
+Check out the [Wiki-pages][Intro] to learn more.
 
 Currently it supports only the Oracle and MySQL database servers.
 
+[Intro]: https://github.com/RaduMarcel/EspressoViews/wiki/1.-Introduction
 
 ## **Which are the concepts of EspressoViews?**
 
@@ -22,7 +23,6 @@ Currently it supports only the Oracle and MySQL database servers.
 The smallest unit or module is built around a single SQL query. A report is made of at least two such SQL query units. The above example is made of three SQL query units, but theoretically there is no limitation. Any report definition, can be on his side embedded in another report definition. 
 
 More details about this approach you can find in the chapters [The main ideas behind this tool][Ideas] and [Defining an EspressoViews report][ReportDef]
-
 [Ideas]: https://github.com/RaduMarcel/EspressoViews-/wiki/2.-The-main-ideas-behind-this-tool
 [Reportref]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
 
