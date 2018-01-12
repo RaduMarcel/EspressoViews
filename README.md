@@ -13,7 +13,7 @@ Check out the [Wiki-pages][Intro] to learn more.
 
 Currently it supports only the Oracle and MySQL database servers.
 
-[Intro]: https://github.com/RaduMarcel/EspressoViews/wiki/1.-Introduction
+[Intro]: https://github.com/RaduMarcel/EspressoViews/wiki
 
 ## **Which are the concepts of EspressoViews?**
 
