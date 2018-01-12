@@ -23,6 +23,7 @@ Currently it supports only the Oracle and MySQL database servers.
 The smallest unit or module is built around a single SQL query. A report is made of at least two such SQL query units. The above example is made of three SQL query units, but theoretically there is no limitation. Any report definition, can be on his side embedded in another report definition. 
 
 More details about this approach you can find in the chapters [The main ideas behind this tool][Ideas] and [Defining an EspressoViews report][ReportDef]
+
 [Ideas]: https://github.com/RaduMarcel/EspressoViews-/wiki/2.-The-main-ideas-behind-this-tool
 [Reportref]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
 
