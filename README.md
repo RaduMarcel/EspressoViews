@@ -1,15 +1,17 @@
 # EspressoViews
 
-EspressoViews is a standalone Java tool for reporting and data analysis from relational databases (RDBMS).
+EspressoViews is a standalone Java tool for data analysis and reporting from relational databases (RDBMS).
 
-This tool is built around a concept of defining reports made of many loosely linked SQL queries to cover vast areas of data schema and to display large amout of results in a human readable form.
+This tool is built around a concept whose aim is to cover vast areas of data schema and to display large volumes of data in a human readable form.
 
 ![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsImg1.png)
 
 
-In a nutshell, Espresso View merges the results of many SQL queries to a hierarchically structured result and displays it as a tree structure which can be manually expanded and collapsed. 
+In a nutshell, EspressoViews merges the results of many SQL queries to a hierarchically structured result and displays it as a tree structure which can be manually expanded and collapsed. 
 
-Currently it supports "only" the Oracle and MySQL database servers.
+Check out the [Wiki-pages][Ideas] to learn more.
+
+Currently it supports only the Oracle and MySQL database servers.
 
 
 ## **Which are the concepts of EspressoViews?**
@@ -24,16 +26,10 @@ More details about this approach you can find in the chapters [The main ideas be
 [Ideas]: https://github.com/RaduMarcel/EspressoViews-/wiki/2.-The-main-ideas-behind-this-tool
 [Reportref]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
 
-- The goal of this report definition framework is not only to support the modularization of data retrieval in many loosely linked queries but also to induce SQL coding into a higher level design approach. 
-
-If you have one monolithic SQL query which retrieves everything you need or if you plan to build such a query and you are looking forward to create a report around it, then this reporting tool will not be useful for you.
-
-This tool is best suitable for use cases in which the data retrieval is made of a multitude of SQL queries, where at any time new queries have to be included, changed or removed. 
-
 
 - Another aim of this tool is to maintain the human readability without reducing the complexity and/or the amount of data.
 
-Espresso view first runs all SQL queries as specified in the report definition without prior filtering by the user. 
+EspressoViews first runs all SQL queries as specified in the report definition without prior filtering by the user. 
 The first data shown to the user is the result of the root query, which can be used as a summary or as an introduction for the rest of the data tree. The user then decides which meaningful "data path" to follow further.
 
 Though, a graphical user interface for filtering prior to and after the data retrieval is in some cases still necessary and will be supported in the future as optional features.
