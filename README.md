@@ -1,4 +1,4 @@
-https://github.com/RaduMarcel/EspressoViews/blob/master/CONTRIBUTING.md# EspressoViews
+# EspressoViews
 
 EspressoViews is a standalone Java tool for data analysis and reporting from relational databases (RDBMS).
 
@@ -83,6 +83,7 @@ If you replace the JDBC driver packages then make sure the new driver file name 
 ## Contributing
 
 There are many ways to [contribute][Contributing] to this open source project. 
+
 [Contributing]: https://github.com/RaduMarcel/EspressoViews/blob/master/CONTRIBUTING.md
 
 ## Credits: 
