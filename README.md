@@ -1,4 +1,4 @@
-# EspressoViews
+https://github.com/RaduMarcel/EspressoViews/blob/master/CONTRIBUTING.md# EspressoViews
 
 EspressoViews is a standalone Java tool for data analysis and reporting from relational databases (RDBMS).
 
@@ -11,7 +11,7 @@ In a nutshell, EspressoViews merges the results of many SQL queries to a hierarc
 
 Check out the [Wiki-pages][Intro] to learn more.
 
-Currently it supports only the Oracle and MySQL database servers.
+Currently the idea is greater than the implementation. The fundamental part is in place, but there are many features and functionalities stil to implement or to enhance. For instance we could support more database systems in addition to the Oracle and MySQL database servers. You are welcome [to contribute][Contributing] and help this project to go in a good direction.
 
 [Intro]: https://github.com/RaduMarcel/EspressoViews/wiki
 
@@ -82,7 +82,8 @@ If you replace the JDBC driver packages then make sure the new driver file name 
 
 ## Contributing
 
-To be continued
+There are many ways to [contribute][Contributing] to this open source project. 
+[Contributing]: https://github.com/RaduMarcel/EspressoViews/blob/master/CONTRIBUTING.md
 
 ## Credits: 
 Espresso Views, Version 0.5
