@@ -11,7 +11,8 @@ In a nutshell, EspressoViews merges the results of many SQL queries to a hierarc
 
 Check out the [Wiki-pages][Intro] to learn more.
 
-Currently the idea is greater than the implementation. The fundamental part is in place, but there are many features and functionalities stil to implement or to enhance. For instance we could support more database systems in addition to the Oracle and MySQL database servers. You are welcome [to contribute][Contributing] and help this project to evolve in a good direction.
+There is a lot of space to improve funtionality and user experience. You are welcome [to contribute][Contributing] with your feedback, ideas and/or coding experience and help this project to evolve.
+But the way, this tool supports only Oracle and MySQL DBMS.
 
 [Intro]: https://github.com/RaduMarcel/EspressoViews/wiki
 
