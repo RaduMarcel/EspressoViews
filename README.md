@@ -9,7 +9,7 @@ Check out the [Wiki-pages][Intro] to learn more.
 
 [Intro]: https://github.com/RaduMarcel/EspressoViews/wiki
 
-## ** How to define an Espresso Views Report ?**
+### How to define an Espresso Views Report 
 
 - The core feature is the human friendly ["narrative flow" approach][Ideas] which allows you to connect the information retrieved by many SQL queries in a context comparable with writing a text made of many phrases.
 
@@ -22,7 +22,7 @@ Check out the [Wiki-pages][Intro] to learn more.
 [Reportref]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
 
 
-- Maintain the human readability without reducing the complexity and/or the amount of data.
+### Maintain the human readability without reducing the complexity and/or the amount of data.
 
 EspressoViews first runs all SQL queries as specified in the report definition without prior filtering by the user. 
 The first data shown to the user is the result of the root query, which can be used as a summary or as an introduction for the rest of the data tree. The user then decides which meaningful "data path" to follow further.
@@ -33,7 +33,7 @@ Though, a graphical user interface for filtering prior to and after the data ret
 There is a lot of space to improve funtionality and user experience. You are welcome [to contribute][Contributing] with your feedback, ideas and/or coding experience and help this project to evolve.
 But the way, this tool supports only Oracle and MySQL DBMS.
 
-## What should I do to give it a try? 
+### What should I do to give it a try? 
 
 You need first to have a Java Runtime version 1.8 or higher installed installed on your machine (it works also with version 1.7 but it is not fully tested).
 To do a quick check type in the command line:
