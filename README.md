@@ -14,9 +14,9 @@ Check out the [Wiki-pages][Intro] to learn more.
 - The core feature is the human friendly ["narrative flow" approach][Ideas] which allows you to connect the information retrieved by many SQL queries in a context comparable with writing a text made of many phrases.
 
 - The smallest report unit or module is built around a single SQL query. A report is made of at least two such report units. The above example is made of three units, but theoretically there is no limitation as long as the whole structure is a tree structure. 
-- Any report definition, can be on his side embedded in another report definition. 
+- Any report definition can be on his side embedded in another report definition. 
 
-- More details about this approach you can find in the chapters [The main ideas behind this tool][Ideas] and [Defining an EspressoViews report][ReportDef]
+- More details about this approach can be found in the chapters [The main ideas behind this tool][Ideas] and [Defining an EspressoViews report][ReportDef]
 
 [Ideas]: https://github.com/RaduMarcel/EspressoViews-/wiki/2.-The-main-ideas-behind-this-tool
 [Reportref]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
