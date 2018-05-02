@@ -465,7 +465,7 @@ protected static Document getXmlDocument(String filePath) {
 			if (queryDef.get("TRANSMITTEDCONDITIONCOLUMNS")!=null){
 				String[] transmittedCondCols = queryDef.get("TRANSMITTEDCONDITIONCOLUMNS").split(",");	 
 				for (int x=0; x<transmittedCondCols.length; x++)
-					result.get(result.size()-1).addTransmittedConditionAttribute(transmittedCondCols[x].toUpperCase()) ;
+					result.get(result.size()-1).addTransmittedConditionAttribute(transmittedCondCols[x].toUpperCase().trim()) ;
 			}
 			if (queryDef.get("RESULTCOLUMNS")!=null){
 				String[] resultCols = queryDef.get("RESULTCOLUMNS").split(",");	 
