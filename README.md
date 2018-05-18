@@ -1,22 +1,25 @@
 # EspressoViews
 
-EspressoViews is a standalone Java tool for data analysis and reporting from relational databases (RDBMS).
+- EspressoViews is a standalone Java tool for data analysis and reporting from relational databases (RDBMS).
 
 In a nutshell, EspressoViews merges the results of many SQL queries to a hierarchically structured data set and displays it in a data tree structure which can be manually expanded and collapsed. 
-![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsImg1.png)
-
-Check out the [Wiki-pages][Intro] to learn more.
-
-[Intro]: https://github.com/RaduMarcel/EspressoViews/wiki
-
-### How to define an Espresso Views Report 
 
 - The core feature is the human friendly ["narrative flow" approach][Ideas] which allows you to connect the information retrieved by many SQL queries in a context comparable with writing a text made of many phrases.
 
-- The smallest report unit or module is built around a single SQL query. A report is made of at least two such report units. The above example is made of three units, but theoretically there is no limitation as long as the whole structure is a tree structure. 
-- Any report definition can be on his side embedded in another report definition. 
 
-- More details about this approach can be found in the chapters [The main ideas behind this tool][Ideas] and [Defining an EspressoViews report][ReportDef]
+![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsImg1.png)
+
+
+### How to generate an Espresso Views Report 
+
+You need first to [define an EspressoViews report XML file][ReportDef]. Then you connect to a database server using  EspressoViews and let the tool run your report defintion file. 
+
+- A report is made of at least two report units 
+
+- A report unit or module is built around a single SQL query. The above example is made of three units, but theoretically there is no limitation as long as the whole structure is a tree structure. 
+
+- Any report definition file can be on his side embedded in another report definition file. Also here there is not  is no limitation as long as the linked files are defining tree structure
+
 
 [Ideas]: https://github.com/RaduMarcel/EspressoViews-/wiki/2.-The-main-ideas-behind-this-tool
 [Reportref]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
