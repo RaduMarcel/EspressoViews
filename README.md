@@ -16,7 +16,7 @@ You should first [read how to define an EspressoViews report][ReportDef] and the
 
 - A report is made of at least two report units 
 
-- A report unit or module is built around a single SQL query. The above example is made of three units, but theoretically there is no limitation as long as the whole structure is a tree structure. 
+- A report unit is built around a single SQL query. The above example is made of three units, but theoretically there is no limitation as long as the whole structure is a tree structure. 
 
 - Any report definition file can be on his side embedded in another report definition file. Also here there is not  is no limitation as long as the linked files are defining tree structure
 
