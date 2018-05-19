@@ -12,7 +12,7 @@
 
 ### How to generate an Espresso Views Report 
 
-You should first [read how to define an EspressoViews report][ReportDef] and then follow [the few syntax rules needed to create a report definiton XML file][ReportSyntax]. And finally you connect to a database server using EspressoViews and you let the tool to process your report defintion file. 
+You should first [read how to define an EspressoViews report][ReportDef] and then follow [the few syntax rules needed to create a report definiton XML file][ReportSyntax]. And finally you connect to a database server using EspressoViews and you let the tool process your report defintion file. 
 
 - A report is made of at least two report units 
 
