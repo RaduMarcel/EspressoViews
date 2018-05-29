@@ -1,10 +1,10 @@
 # EspressoViews
 
-- EspressoViews is a standalone Java tool for data analysis and reporting from relational databases (RDBMS).
+- EspressoViews is a standalone Java tool for reporting and analysis and from relational databases (RDBMS).
 
-- In a nutshell, EspressoViews merges the results of many SQL queries to a hierarchically structured data set and displays it in a data tree structure which can be manually expanded and collapsed. 
+- The main feature is a new, human friendly ["narrative flow" approach][Ideas] which allows you to connect the information retrieved by many SQL queries in a context comparable with writing a text made of many phrases.
 
-- The core feature is the human friendly ["narrative flow" approach][Ideas] which allows you to connect the information retrieved by many SQL queries in a context comparable with writing a text made of many phrases.
+- EspressoViews merges the results of meaningfull interconnected SQL statements and displays them in a data tree structure, which can be expanded and collapsed by the user. 
 
 
 ![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsImg1.png)
