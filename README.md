@@ -4,9 +4,11 @@
 
 - The main feature is a new, human friendly ["narrative flow" approach][Ideas] which allows you to connect the information retrieved by many SQL statement to a higher level of meaning. 
 
-- The ideal is to allow the formulation of text-like structure made of SQL statements
+- The ideal is to allow the creation of text-like structures made of SQL statements
 
 - EspressoViews merges the results of meaningfull interconnected SQL statements and displays them in a data tree structure, which can be expanded and collapsed by the user. 
+
+- Addiction Warning for people who love SQL!! :) 
 
 
 ![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsImg1.png)
