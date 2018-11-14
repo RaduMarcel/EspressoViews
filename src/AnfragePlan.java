@@ -15,7 +15,8 @@ public class AnfragePlan {
 	private Set<String> transmittedConditionAttributes;//the column names supposed to be inherited by the children in the where-clause of this sqlQuery
 	List<TransmittedCondition> transmittedConditions; //the where clause supposed to be inherited by the children of this sqlQuery	
 	StringBuilder  inheritedConditions; //columns from the super-sqlQuery that will be added to the where clause of the sqlQuery   
-	private int maxInheritanceDepth;
+	private int maxInheritanceDepth, maximumResultRows;
+
 	private String tempTable;
 	private String[][] resultRowsMatrix;
 	
@@ -128,7 +129,7 @@ public class AnfragePlan {
 			hasInheritance = true;
 		
 		for (TransmittedCondition condi:this.transmittedConditions){
-			 if (!hasInheritance || !this.superSQLQuery.transmittedConditions.contains(condi) )//TODO ist uperCase nötig? 
+			 if (!hasInheritance || !this.superSQLQuery.transmittedConditions.contains(condi) )//TODO ist upperCase nötig? 
 				 newTransmittedConditionAttributes.add(condi.getIdentifier());
 		}
 		return newTransmittedConditionAttributes; 
@@ -165,6 +166,14 @@ public class AnfragePlan {
 	public int getMaxInheritanceDepth() {
 		return maxInheritanceDepth;
 	}
+	public int getMaximumResultRows() {
+		return maximumResultRows;
+	}
+
+	public void setMaximumResultRows(int maximumResultRows) {
+		this.maximumResultRows = maximumResultRows;
+	}
+	
 	public List<String> getAllResultColumns() {
 		return allResultColumns;
 	}
@@ -176,8 +185,9 @@ public class AnfragePlan {
 public boolean generateData(Connection conn, JTextArea txtProgressgMessage) throws Exception{
 
 	if (dataGenerated) return true;
-logger.info("Data generation for the query "+this.sqlQueryLabel+" begins.\nThe query as provided in the definition file:\n"+this.sqlQuery);
-txtProgressgMessage.append("Process the report entity "+this.sqlQueryLabel+".");
+logger.info("Data generation for the query "+this.sqlQueryLabel+" begins.");
+logger.debug("The SQL query provided in the definition file:\n"+this.sqlQuery);
+txtProgressgMessage.append("Process the report entity '"+this.sqlQueryLabel+"'.");
 	this.rebuiltQuery = this.sqlQuery;		
 		if (!conditionsReceived && this.transmittedConditions!=null && this.subQueries.size()>0 && this.transmittedConditionAttributes.size()==0) 
 		{//Wenn eine Query keine Angabe macht, was an die Kinder vererbt werden soll, dann wird alles, was vererbt werden kann,vererbt. Es wird also überprüft, welche column_names mit den der Kinder übereinstimmen, und alle Treffer werden in das Erbe aufgenommen
@@ -249,8 +259,11 @@ txtProgressgMessage.append("Process the report entity "+this.sqlQueryLabel+".");
 			Statement stmnt = conn.createStatement();
 			stmnt.execute(this.rebuiltQuery);stmnt.close();
 			logger.info("Query "+this.getQueryName()+" rebuilt and sucessfully executed:");
-			logger.info(rebuiltQuery);
-			generateDataMatrix(conn);
+			logger.debug(rebuiltQuery);
+			String SQLExecutionFeedback="";
+			SQLExecutionFeedback=generateDataMatrix(conn);
+			if (SQLExecutionFeedback!=null&& SQLExecutionFeedback!="")
+				txtProgressgMessage.append(SQLExecutionFeedback);
 			logger.info("Retrieved "+ this.resultRowsMatrix[0].length +"rows with each "+(this.resultRowsMatrix.length-1)+" columns" );
 			txtProgressgMessage.append("Done, "+this.resultRowsMatrix[0].length +" rows.\n");
 			dataGenerated=true;
@@ -277,7 +290,8 @@ return true;
 }
 
 public void setTransmittedConditions() throws SQLException{
-//Diese methode nimmt die zu vererbenden column_names(transmittedConditionAttributes) und geht damit durch die daten der Query durch und updated die zu vererbende Einschränkung  
+//Diese Methode nimmt die zu vererbenden column_names(transmittedConditionAttributes) und geht damit durch die Daten der Query durch und updated die zu vererbende Einschränkung für die nachfolgenden Kindern
+//	Das wird gemacht um die Datensatz der Kinder queries auf das Nötigste zu minimieren und damit Memory zu sparen 
 	Set<String>applicableConditionAttributes= new HashSet<String>();   
 	for (String trCond : this.transmittedConditionAttributes){
 		if (DataJumper.containsCaseInsensitive(this.allResultColumns,trCond)){   
@@ -301,27 +315,32 @@ for (int t=0; t<resultRowsMatrix.length;t++  ) {
 		HashSet<String> conditionValues = new HashSet<String>();
 		//System.out.println(resultRowsMatrix[t][0]);
 		boolean hasMoreThan1000Expressions=false;
-		if (resultRowsMatrix[t].length >=1000) 
-			hasMoreThan1000Expressions=true;
-		for (int tt=1;tt<resultRowsMatrix[t].length && tt<=1000 ;tt++){
-			//System.out.println(resultRowsMatrix[t][tt]); 
-			conditionValues.add("'"+resultRowsMatrix[t][tt]+"'");
+		if (resultRowsMatrix[t].length <1000)//wenn eine transmitted condition column mehr als 1000 Werte weiterverebt, dann entfällt diese Optimierung ganz, denn (zumindest Oracle) erlaubt nur 1000 Werte in der "in"-clause. Es kann natürlich sein, dass andere Anbieter andere Grenzen setzten, dann müsste man den Wert vom Datenbankanbieter abhängig machen
+		{	
+			for (int tt=1;tt<resultRowsMatrix[t].length;tt++){
+				//System.out.println(resultRowsMatrix[t][tt]); 
+				conditionValues.add("'"+resultRowsMatrix[t][tt]+"'");
+			}
 		}
+		else 
+			hasMoreThan1000Expressions=true;
+		
 		if (conditionValues.size()>0){
 			if (!this.transmittedConditions.contains(new TransmittedCondition(columnName,null,0))){
 				this.transmittedConditions.add(new TransmittedCondition(columnName, " in " +
 											   "("+getElementsWithSeparator((AbstractCollection<String>)(conditionValues),",").
 											   replaceAll("'null'", "null")//in where clauses soll null und nicht 'null' werwendet werden 
 											   +")",1));
-				if 	(hasMoreThan1000Expressions)
-					this.transmittedConditions.get(this.transmittedConditions.size()-1).setHasMoreThen1000Expressions(true);
 			}
 			else
 				this.transmittedConditions.get(
 							this.transmittedConditions.indexOf(new TransmittedCondition(columnName,null,0))
 							).setValue(" in ("+getElementsWithSeparator((AbstractCollection<String>)(conditionValues),",") +")");
 		}
-		else this.transmittedConditions.add(new TransmittedCondition(columnName, " = null",1)); 	
+		if (conditionValues.size()==0 && hasMoreThan1000Expressions==false) 
+			this.transmittedConditions.add(new TransmittedCondition(columnName, " = null",1));
+		if (hasMoreThan1000Expressions)
+			this.transmittedConditions.add(new TransmittedCondition(columnName, " like '%'",1));
 	}
 }
 //old implementation with select distinct 
@@ -400,8 +419,8 @@ if (relevantPart.contains("*"))
 	else return false;
 }
 
-void generateDataMatrix(Connection conn){ 
-String getDisplayData=null;
+String generateDataMatrix(Connection conn) {
+String getDisplayData=null,SQLExecutionFeedback=null;
 	try{
 	int maxRowNum = getNumberofRows("Select count(*) from "+this.tempTable, conn);
 	getDisplayData="Select * from "+this.tempTable;
@@ -410,6 +429,14 @@ String getDisplayData=null;
 	ResultSet rs = stmnt.executeQuery();
 	ResultSetMetaData rsMeta = rs.getMetaData();
 	String[][] resultRowsMatrix;
+	if (maxRowNum>this.getMaximumResultRows())
+		{
+		SQLExecutionFeedback="\nThe query '"+this.getQueryName()+"' retrieves "+maxRowNum+" rows. This is more than the defined maximum of "+this.getMaximumResultRows()+" rows." +
+				"\nThe first retrieved "+this.getMaximumResultRows()+" rows are further used and the other "+(maxRowNum-this.getMaximumResultRows())+" are not considered " +
+				 "\n(use the attribute 'MaxResultRows' in the the XML tag SQLQueryDefinition to can set the maximum rows number)\n";
+		maxRowNum=this.getMaximumResultRows()-1;
+		logger.info(SQLExecutionFeedback);
+		}
 	if (maxRowNum==0)  
 		{resultRowsMatrix = new String[rsMeta.getColumnCount()][2];//der "leere" Ergebnisssatz hat zwei Zeilen, eine mit den column_names und eine mit leeren Feldern 
 		this.emptyResultset = true;
@@ -428,9 +455,9 @@ String getDisplayData=null;
 	else 
 		for (colNum=0; colNum<rsMeta.getColumnCount() ; colNum++) {
 			String res="";
-			while (rs.next()){
+			while (rowNum<=maxRowNum && rs.next()){
 			try{	
-				res =rs.getString(resultRowsMatrix[colNum][0]);
+				res =rs.getString(resultRowsMatrix[colNum][0]);//jede zeile hat column name
 				resultRowsMatrix[colNum][rowNum]=res;
 				if (res!=null && res !="") 
 						res.replaceAll("\\*", ".*");
@@ -451,7 +478,9 @@ String getDisplayData=null;
 	}catch (SQLException sq) {
 	ErrorMessage.showException("Database vendor thrown an error while executing the query:\n"+getDisplayData+"\n"+sq.getMessage()+"\n"+ErrorMessage.showStackTrace(sq.getStackTrace()));
 logger.error("Database thrown error while executing the query:\n"+getDisplayData+"\n"+sq.getMessage()+"\n"+ErrorMessage.showStackTrace(sq.getStackTrace()));
+
 	}
+	return SQLExecutionFeedback;
 }
 
 static String generateTempTable(Connection conn, AnfragePlan anfrage) {

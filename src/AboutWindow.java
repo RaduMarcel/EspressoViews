@@ -66,8 +66,8 @@ public class AboutWindow extends JDialog {
 		dtrpnhalloconvertMe.setText("<html>\r\n</head>\r\n" +
 								    "<body style=\"background: transparent\">\r\n" +
 								    "<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\n<font face=\"Times New Roman, serif\"><font size=\"6\" style=\"font-size: 24pt\"><b>Espresso\r\nViews</b></font></font>" +
-								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nVersion 0.5 \r\n" +
-								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nlast changed: Marburg, Germany, Oktober 2017</p>\r\n" +
+								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nVersion 0.51 \r\n" +
+								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nlast changed: Marburg, Germany, November 2018</p>\r\n" +
 								    "<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nCopyright <font face=\"Liberation Serif, serif\">&copy; Radu-Marcel\r\nDumitru</font>" +
 								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\n<font face=\"Liberation Serif, serif\">" +
 								    "This program is free software; you can redistribute it and/or modify it under the terms of the GNU GENERAL PUBLIC LICENSE, Version 3 as published by the Free Software Foundation on 29 June 2007</font></p>"+

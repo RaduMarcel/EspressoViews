@@ -421,7 +421,7 @@ protected static Document getXmlDocument(String filePath) {
 
 		if ( ( anfrageCounter==1 && queryDef.get("SUPERSQLQUERY")!=null && !queryDef.get("SUPERSQLQUERY").trim().equals(""))  )
 //			validationComments.append("Die erste Anfragedefinition darf keiner anderen Anfragedefinition untergeordnet werden.\nLöschen Sie den XML-tag SuperSQLQuery aus der Anfragedefinition "+queryLabel+"\n\n");
-			validationComments.append("The first report entity cannot be subordinated under other report entity.\nDelete the XML tag SuperSQLQuery from the report entity "+queryLabel+"\n\n");
+			validationComments.append("The first report entity cannot be subordinated to any other report entity.\nDelete the XML tag SuperSQLQuery from the report entity "+queryLabel+"\n\n");
 	
 		if (  anfrageCounter>1 
 			   && queryDef.get("SUPERSQLQUERY")!=null 
@@ -430,7 +430,7 @@ protected static Document getXmlDocument(String filePath) {
 		   )
 //			validationComments.append("Die übergeordnete Anfragedefinition "+queryDef.get("SUPERSQLQUERY") +" wurde nicht gefunden.\n" +
 //					("Die Anfragedefinition "+queryLabel+" kann folgenden Anfragedefintionen untergeordnet werden:\n"+queryLabels +"\n\n").replace("[", "").replace("]", "")  );
-			validationComments.append("The report entity "+queryLabel+" specifies a super query which is not one of the preceding report entities: "+queryDef.get("SUPERSQLQUERY") +".\n" +
+			validationComments.append("A parent report entity must precede a child report entity. But the report entity "+queryLabel+" specifies as parent query the report entitie "+queryDef.get("SUPERSQLQUERY") +".\n" +
 			("The report entity "+queryLabel+" can be subordinated only to one of the following report entities:\n"+queryLabels +"\n\n").replace("[", "").replace("]", "")  );
 
 			
@@ -448,6 +448,8 @@ protected static Document getXmlDocument(String filePath) {
 			String query = queryDef.get("SQLQUERY").replace(";", ""); 
 			String queryLabel = queryDef.get("SQLQUERYLABEL").trim(); 
 			String suppressDisplayIfNoData = queryDef.get("SUPPRESSDISPLAYIFNODATA"); 
+			String maximumResultRows = queryDef.get("MAXRESULTROWS");
+
 			AnfragePlan superQuery=null;
 			int maxInheritanceDepth=10000;
 			if (queryDef.get("MAXINHERITANCEDEPTH")!=null)
@@ -474,6 +476,10 @@ protected static Document getXmlDocument(String filePath) {
 			}
 			if (suppressDisplayIfNoData!=null && (suppressDisplayIfNoData.equals("TRUE")||suppressDisplayIfNoData.equals("YES")||suppressDisplayIfNoData.equals("1")) )
 				result.get(result.size()-1).setSuppressDisplayIfNoData(true);
+			if (maximumResultRows!= null)
+				result.get(result.size()-1).setMaximumResultRows (new Integer(maximumResultRows));
+			else 
+				result.get(result.size()-1).setMaximumResultRows (10000);
 			
 			if (queryDef.get("SUBQUERYLOCATOR")!=null){
 				AnfragePlan parentQuery= result.get(result.size()-1);

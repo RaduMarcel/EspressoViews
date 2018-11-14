@@ -34,8 +34,7 @@ public boolean startDataJumper (
 		final String dbType, final String connectionName, final String host,final String port,final String connType,final String serviceName, final String userName, 
 		final String password, final String file, final JDialog dialog) {
 
-final String defFileNameOnly=new File(file).getName();
-	
+final String defFileNameOnly=new File(file).getName();	
 //das Hauptfenster
 	final JFrame frame = new JFrame(defFileNameOnly+" : 	"+connectionName);
 	frame.setVisible(true);
@@ -60,9 +59,11 @@ final String defFileNameOnly=new File(file).getName();
     scrollPaneTop.setViewportView(txtProgressMessage);
 	txtProgressMessage.setEditable(false);	
 // und in einem Unterteil, hier werden nach dem report-Aufbau die progress messages und die warnings angezeigt	
+	final JTabbedPane tabbedPaneBottom = new JTabbedPane();
+	splitPane.setRightComponent(tabbedPaneBottom);
 	final JScrollPane scrollPaneBottom =  new JScrollPane();
+	tabbedPaneBottom.add("Warnings",scrollPaneBottom);
 	final JTextArea txtwarningMessage = new JTextArea();
-	splitPane.setRightComponent(scrollPaneBottom);
 	scrollPaneBottom.setViewportView(txtwarningMessage);
 	txtwarningMessage.setFont(new Font("Monospaced", Font.BOLD, 13));
 	txtwarningMessage.setBackground(new Color(197,211,229)); 	      
@@ -122,7 +123,7 @@ final String defFileNameOnly=new File(file).getName();
 					logger.info("View is generated with view option 'detailed'");
 //					Thread queryThread = new Thread() {
 //						public void run(){
-							splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,false));
+							splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,false));
 //						}
 //					};
 //					queryThread.start();
@@ -140,7 +141,7 @@ final String defFileNameOnly=new File(file).getName();
 					logger.info("View is generated with view option 'compact'");
 //					Thread queryThread = new Thread() {
 //						public void run(){
-							splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,false));
+							splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,false));
 //						}
 //					};
 //					queryThread.start();
@@ -156,7 +157,7 @@ final String defFileNameOnly=new File(file).getName();
 					viewOption="structure";
 //					Thread queryThread = new Thread() {
 //						public void run(){
-							splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,false));
+							splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,false));
 //						}
 //					};
 //					queryThread.start();
@@ -214,7 +215,7 @@ final String defFileNameOnly=new File(file).getName();
 
 		Thread queryThread = new Thread() {
 			public void run(){
-				final JScrollPane scrollPane = generateTheTree(dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,true);
+				final JScrollPane scrollPane = generateTheTree(dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,true);
 //			if (scrollPane==null) {
 //				frame.dispose();
 //				return false;	
@@ -231,7 +232,7 @@ final String defFileNameOnly=new File(file).getName();
 					allePlaene=null;
 					//btnReload.setVisible(false);
 					logger.info("View defintion file is reloaded upon user request");
-					splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host,port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,true));
+					splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host,port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,true));
 					theGUITree.setSelectionRow(1);
 					btnReload.setVisible(true);
 				}
@@ -251,8 +252,8 @@ final String defFileNameOnly=new File(file).getName();
 
 private JScrollPane generateTheTree(final String dbType, final String connectionName, final String host,final String port, final String connType,
 		final String serviceName, final String userName, final String password,
-		final String file, final JTextArea txtProgressgMessage, JTextArea txtwarningMessage, final JFrame frame, final JDialog dialog, boolean refreshFlag) {
-JTree tree = null;
+		final String file, final JTextArea txtProgressgMessage, JTextArea txtwarningMessage, final JFrame frame, final JDialog dialog, final JTabbedPane tabbedPaneBottom, boolean refreshFlag) {
+//JTree tree = null;
 	//this.allePlaene=null;
 	DefaultMutableTreeNode wurzel = null; 
 	DefaultTreeModel model=null;
@@ -335,7 +336,7 @@ txtProgressgMessage.append("Begin to query the datatabase\n");
 			txtProgressgMessage.append("\n\nData retrieval ended with error!");
 			return new JScrollPane(txtProgressgMessage); 	
 			}
-		logger.info("Data retrieval ended sucessfully");
+		logger.info("Data retrieval ended successfully");
 		//DisplayData.generateBlockDisplay(allePlaene.get(0));
 	}catch (Exception e) {
 		warnings.delete(0, warnings.length());
@@ -364,10 +365,93 @@ long dataTreeGenerated =  new Date().getTime();
 		txtProgressgMessage.append("Data tree generated in "+(float)(dataTreeGenerated-dataRetrivalFinished)/1000  +" seconds\n");
 		logger.info("The generation of the graphical user interface started");
 		model = new DefaultTreeModel(wurzel);
-		tree = new JTree(model);
+		final JTree tree = new JTree(model);
 		renderer = new ResultLineRenderer();
 		//  renderer.setClosedIcon(null);
-		tree.setCellRenderer(renderer); 
+		tree.setCellRenderer(renderer);
+		
+		final JPopupMenu popupTreeChoice = new JPopupMenu(); //Popup menue for right klick 
+        JMenuItem mi = new JMenuItem("Add a restriction");
+        mi.setActionCommand("addRestriction");
+        popupTreeChoice.add(mi);
+        mi = new JMenuItem("Open in a table");
+        mi.setActionCommand("tableView");
+        popupTreeChoice.add(mi);  
+        popupTreeChoice.setOpaque(true);
+        popupTreeChoice.setLightWeightPopupEnabled(false);
+        
+        tree.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent arg0) {
+				if (1==2 && arg0.getButton()==MouseEvent.BUTTON3){//if right-clicked, but switched off for the moment 
+					int selRow = tree.getRowForLocation(arg0.getX(), arg0.getY());
+			         TreePath selPath = tree.getPathForLocation(arg0.getX(), arg0.getY());
+			         DataNode selectedDataNodeLabel =null;
+			                 if (selRow>-1){
+			                	 popupTreeChoice.show( (JComponent)arg0.getSource(), arg0.getX(), arg0.getY() );
+			                	 
+			                	tree.setSelectionPath(selPath); 
+			                    tree.setSelectionRow(selRow);
+			                    String nextLabel = "";
+			                    DefaultMutableTreeNode currNode= (DefaultMutableTreeNode)(selPath.getLastPathComponent());
+			                    if (currNode.getUserObject() instanceof DataNode){
+			                    	selectedDataNodeLabel = (DataNode)(currNode.getUserObject()); 
+			                    	if (selectedDataNodeLabel.isLabel && selectedDataNodeLabel.getParent()!=null)
+			                    		nextLabel= selectedDataNodeLabel.values;
+			                    	else{
+			                    		if (selectedDataNodeLabel.getParent()!=null ){
+			                    			selectedDataNodeLabel=selectedDataNodeLabel.getParent();
+			                    			nextLabel= selectedDataNodeLabel.values;
+			                    		}			                    		
+			                    	}
+			                    }
+			                    if (currNode.getUserObject() instanceof String){
+			                    	if (currNode.getNextNode().getUserObject() instanceof DataNode){
+			                    		selectedDataNodeLabel = ((DataNode)(currNode.getNextNode().getUserObject())).getParent();
+			                    		nextLabel=selectedDataNodeLabel.values;
+			                    	//			(String)(currNode.getUserObject());	
+			                    	}
+			                    	//tableModel= new DefaultTableModel			                    	
+			                    }
+			                  if (selectedDataNodeLabel!=null){
+			                	  String[] columnName = selectedDataNodeLabel.getChildren().get(0).getColumnArray(true);
+			                	  String[][]columnData = new String [selectedDataNodeLabel.getChildren().size()-1][columnName.length];
+			                	  for (int t=1;t<selectedDataNodeLabel.getChildren().size()-1;t++){
+			                		  columnData[t-1]= selectedDataNodeLabel.getChildren().get(t).getValueArray(true);
+			                	  }
+			                	  JTable dataTable = new JTable(columnData, columnName);
+			                	  dataTable.setFillsViewportHeight(true);
+			                	  JScrollPane scrollPane = new JScrollPane(dataTable);
+			                	  tabbedPaneBottom.add(nextLabel ,scrollPane);
+			                	  dataTable.setRowSelectionAllowed(false);
+			                	  dataTable.setCellSelectionEnabled(true);
+			                	  dataTable.setColumnSelectionAllowed(true);
+//			                	  int index = tabbedPaneBottom.indexOfTab(nextLabel);
+//			                	  JPanel pnlTab = new JPanel(new GridBagLayout());
+//			                	  pnlTab.setOpaque(false);
+//			                	  JLabel lblTitle = new JLabel(nextLabel);
+//			                	  JButton btnClose = new JButton("x");
+//			                	  GridBagConstraints gbc = new GridBagConstraints();
+//			                	  gbc.gridx = 0;
+//			                	  gbc.gridy = 0;
+//			                	  gbc.weightx = 1;
+//			                	  pnlTab.add(lblTitle, gbc);
+//			                	  gbc.gridx++;
+//			                	  gbc.weightx = 0;
+//			                	  pnlTab.add(btnClose, gbc);
+//			                	  tabbedPaneBottom.setTabComponentAt(index, pnlTab);
+			                	  for (int t=0; t< frame.  getComponentCount();t++){
+			                		  System.out.println(t+"  "+frame.getComponent(t));  
+			                		  
+			                	  }
+			                	  
+			                	  
+			                    }
+								
+			                 }
+				}
+			}
+		});
 		final JScrollPane scrollPane = new JScrollPane(tree);
 		scrollPane.setOpaque(true);
 		//tree.setBackground(new Color(204, 204, 250));
@@ -523,13 +607,6 @@ class ResultLineRenderer extends DefaultTreeCellRenderer implements TreeCellRend
 	  public ResultLineRenderer() {
 	    renderer = new JPanel(new GridLayout(0, 1));
 	    table = new JTable();
-	    table.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent arg0) {
-					System.out.println("Bäm!! "+arg0.getButton()+"  "+arg0.getLocationOnScreen());
-					System.out.println(arg0.getSource().getClass()+" "+arg0.getSource());
-			}
-		});
 	    setClosedIcon(null);
 		setOpenIcon(null);
 //		JScrollPane scrollPane = new JScrollPane(table);
