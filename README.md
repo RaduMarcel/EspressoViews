@@ -86,7 +86,7 @@ There are many ways to [contribute][Contributing] to this open source project.
 [Contributing]: https://github.com/RaduMarcel/EspressoViews/blob/master/CONTRIBUTING.md
 
 ## Credits: 
-Espresso Views, Version 0.5
+Espresso Views, Version 0.51
 
 Copyright © Radu-Marcel Dumitru
 
