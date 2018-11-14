@@ -7,6 +7,7 @@
 
 - Its human friendly [approach][Ideas] allows you to connect a, theoretically, unlimited number SQLs to a report as simple as adding phrases to a text.  
 
+- More About? Check the [Wiki][Wiki] pages!
 
 ![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsImg1.png)
 
@@ -24,7 +25,7 @@ You should first [read how to define an EspressoViews report][ReportDef] and the
 
 [Ideas]: https://github.com/RaduMarcel/EspressoViews-/wiki/2.-The-main-ideas-behind-this-tool
 [Reportref]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
-
+[Wiki]: https://github.com/RaduMarcel/EspressoViews/wiki
 
 ### Maintain the human readability without reducing the complexity and/or the amount of data.
 
