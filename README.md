@@ -39,9 +39,9 @@ There is a lot of space to improve funtionality and user experience. You are wel
 But the way, this tool supports only Oracle and MySQL DBMS.
 
 
-### What else is required to give it a try? 
+### What is required to give it a try? 
 
-You need first to have a Java Runtime version 1.8 or higher installed installed on your machine (it works also with version 1.7 but it is not fully tested).
+You need first to have a Java Runtime version 1.7 or higher installed installed on your machine.
 To do a quick check type in the command line:
 ```
 java -version
