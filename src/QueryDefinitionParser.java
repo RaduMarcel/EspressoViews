@@ -248,7 +248,7 @@ public static void amendConnectionDetailsXML(String defFile, Map<String,String> 
 
 public static void addConnectionDetailsToDefFile(String filePath, Map<String,String> connDet ){
 	Document doc = getXmlDocument(filePath);
-	Element newConnection= doc.createElement("DBConnectionDefinition");
+	Element newConnection = doc.createElement("DBConnectionDefinition");
 	newConnection.appendChild(doc.createElement("connectionName"));
 		newConnection.getLastChild().appendChild(doc.createTextNode(connDet.get("CONNECTIONNAME")));
 	newConnection.appendChild(doc.createElement("connectionType"));
@@ -261,11 +261,13 @@ public static void addConnectionDetailsToDefFile(String filePath, Map<String,Str
 		newConnection.getLastChild().appendChild(doc.createTextNode(connDet.get("HOST")));
 	newConnection.appendChild(doc.createElement("userName"));
 		newConnection.getLastChild().appendChild(doc.createTextNode(connDet.get("USERNAME")));
-	
-	getElementByTagName(doc,"DBConnectionDefinition").getParentNode().appendChild(newConnection); 	
-	//getElementByTagName(doc,"ROOT").appendChild(newConnection);	
-	storeXmlDocToFile(filePath, doc);		
-	showMeTheDoc(newConnection, 1);
+	if (getElementByTagName(doc,"DBConnectionDefinition") !=null){
+	getElementByTagName(doc,"DBConnectionDefinition").getParentNode().appendChild(newConnection);			
+	}
+	else
+		doc.getFirstChild().appendChild(newConnection);
+//	showMeTheDoc(doc, 1);
+	storeXmlDocToFile(filePath, doc);
 }
 
 private static void storeXmlDocToFile(String iniFile, Document doc){
