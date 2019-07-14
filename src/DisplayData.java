@@ -2,6 +2,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +15,7 @@ public class DisplayData {
 		System.out.println(multiplyChars(' ',(level-1)*10)+
 				node+" "+maxRowsLength);
 		if (node.getChildren()!=null && node.getChildren().size()>0){
-			for (DataNode n :node.getChildren()){
+			for (DataNode n : node.getChildren()){
 				showTree(n,level+1); 
 			}
 		}	
@@ -134,26 +135,28 @@ public class DisplayData {
 			}
 		}
 		else {
-			Set<String> inheritedCondAttr =anfrage.getInheritedConditions();
-			Set<String> forwardedCondAttr =anfrage.getNewTransmittedConditionAttributes();
+			Set<String> inheritedCondAttr = anfrage.getInheritedConditions();
+			Set<String> forwardedCondAttr = anfrage.getNewTransmittedConditionAttributes();
 			for (int t=0; t<resultMatrix.length; t++){
 				resultLineColumnNames.append(resultMatrix[t][0]+"@°@"); //Zeigt den Namen der columns
 				columnNamesUpperCase.put(t, resultMatrix[t][0].toUpperCase());
-				if (inheritedCondAttr !=null && DataJumper.containsCaseInsensitive(inheritedCondAttr,resultMatrix[t][0]))
+				if (inheritedCondAttr != null && DataJumper.containsCaseInsensitive(inheritedCondAttr,resultMatrix[t][0]))
 				{
 					resultLineColumnNames.insert(resultLineColumnNames.lastIndexOf(resultMatrix[t][0]), "Inherits "); 
-					isResultColumn[t]=true;
+					isResultColumn[t] = true;
 				}						
 				if (forwardedCondAttr !=null && DataJumper.containsCaseInsensitive(forwardedCondAttr,resultMatrix[t][0])){
 					resultLineColumnNames.insert(resultLineColumnNames.lastIndexOf(resultMatrix[t][0]), "Forwards "); 
-					isResultColumn[t]=true; 
+					isResultColumn[t] = true; 
 				}						
 			}
 		}
 		if (!Arrays.toString(isResultColumn).contains("true"))//wenn aber sämtliche Spaltennamen aus dem resultColumns-liste mit keinem Spaltennamen aus der SQL übereinstimmen, werden alle SQL Spaltennamen angezeigt
 			for (int t=0; t<isResultColumn.length;t++)
 				isResultColumn[t]=true;
-//												HIER BEGINNT DER RECHENINTENSIVE BEREICH!!!!! 		
+		if (anfrage.getInheritedConditions() != null)
+		logger.debug("Try sub-ordinate rows of "+anfrage.getQueryName()+" to "+anfrage.getSuperSQLQuery().getQueryName()+"\n"+resultLineColumnNames.toString().replace("@°@", ","));
+		//												HIER BEGINNT DER RECHENINTENSIVE BEREICH!!!!! 		
 		int colNr=0, rowNr=1;     
 		for (rowNr=1;rowNr < resultMatrix[0].length; rowNr++){//Anfang Schleife durch rows
 		boolean rowMatchesInheritedConditions=true;	
@@ -168,7 +171,7 @@ public class DisplayData {
 					  anfrage.getMaxInheritanceDepth()>=inhertedCondi.getDepth()		 	  //und Vererbungstiefe nicht zu tief ist 	
 					  //&& !resultMatrix[colNr][rowNr].equals(inhertedCondi.getValue()))
 					  && !Pattern.matches(resultMatrix[colNr][rowNr],inhertedCondi.getValue()) )//und die Werte nicht gleich sind 		  
-					  //TODO Wildkey-funktion müsste hier ansetzen    
+					  //Wildkey-funktion mit * ist unterstützt     
 					  ){
 						rowMatchesInheritedConditions=false;
 						break;//Für einen Ausschluss der Zeile reicht, dass eine Bedingung nicht erfüllt wird. Bedingungen werden also und-verknüpft.
@@ -177,7 +180,7 @@ public class DisplayData {
 				//if (!anfrage.hasSuperSQLQuery()){ 
 				for (TransmittedCondition condi:forwardJointCond.values() ){
 					if(condi.getIdentifier().equals(columnNamesUpperCase.get(colNr)) )
-						//Wenn alle Bedingungen erfüllt: Werte aus dieser Spalte wird in die Liste der zu vererbenden Joint Bedingungen aufgenommen 
+						//Wenn alle Bedingungen erfüllt: Werte aus dieser Spalte werden in die Liste der zu vererbenden Joint Bedingungen aufgenommen 
 						condi.setValue(resultMatrix[colNr][rowNr]);					
 				//}
 				}
@@ -189,6 +192,7 @@ public class DisplayData {
 				//System.out.println(multiplyChars(' ',(level-1)*10)+resultLine.toString().substring(0, resultLine.length()-1));
 				DataNode newestChild =new DataNode (resultLineColumnNames.toString().substring(0, resultLineColumnNames.length()-3),
 													resultLine.toString().substring(0, resultLine.length()-3),newChild);
+				logger.debug("The Line "+newestChild.getValues().replace("@°@", ",")+" MATCHED these conditions: "+ inheritedJointCond);
 				newestChild.setIsResultColumn(isResultColumn);
 				newChild.insertOnLevel(newestChild);
 				if (!anfrage.subQueries.isEmpty()){
@@ -198,10 +202,12 @@ public class DisplayData {
 						t++; 	
 					}
 				}	
-			}
+			}			
 			resultLine.delete(0, resultLine.length()); 
 		}//Ende Schleife durch rows
 //												HIER ENDET DER RECHENINTENSIVE BEREICH!!!!!
+//		if
+//			logger.info("DENIED!! "+resultLine.toString().replace("@°@", ","));
 	if (anfrage.isSuppressDisplayIfNoData()&& newChild.getChildren().size()== 0){  
 			result.getChildren().remove(newChild);//Label-Stummel werden beseitigt, wenn die Option isSuppressDisplayIfNoData verwendet wird
 		}	
@@ -216,12 +222,112 @@ public class DisplayData {
 		resultLine.delete(0, resultLine.length()); 
 	}
  }
-	
-static String multiplyChars(char ch, int multiplier){
-StringBuilder result = new StringBuilder(ch);  	
-	for (int t=1;t<multiplier; t++){
-		result.append(ch);
+
+static String generateTableDisplay (DataNode node, String separator, boolean includeSubTrees, int level){
+	StringBuilder result=new StringBuilder("");
+	String firstDelimiter="";
+	firstDelimiter=multiplyChars(separator.charAt(0),level);
+	//Table Title
+	String title=node.values;
+	result.append(firstDelimiter+title+"\n");
+	//Column Names
+	StringBuilder columnNames=new StringBuilder(); 
+	String []columns = node.getFirstChild().getColumnArray();
+	boolean []isResultColumn = node.getFirstChild().getIsResultColumn();
+	for (int t=0;t<columns.length;t++){
+		if (isResultColumn[t])
+			columnNames.append(columns[t].replace(separator, ".")+separator);
 	}
+	columnNames.deleteCharAt(columnNames.length()-1);
+	result.append(firstDelimiter+columnNames+"\n");
+	//Values
+	for(int n=0; n< node.getChildren().size();n++ ){
+		DataNode aNode = node.getChildren().get(n);
+		String []values= aNode.getValueArray();
+		result.append(firstDelimiter);
+		for (int t=0;t<values.length;t++){
+			if (isResultColumn[t])
+				result.append(values[t].replace(separator, ".")+separator);
+		}
+		result.deleteCharAt(result.length()-1).append("\n");
+		if (includeSubTrees && !aNode.getChildren().isEmpty())
+		{
+			for (DataNode subNode: aNode.getChildren()){
+			result.append(generateTableDisplay(subNode,separator,includeSubTrees,level+1));
+			if (node.getChildren().size()> n+1 ) {//Der ColumnNames für die nächsten record werden dargestellt, aber nicht, wenn es der letzte Node ist. Denn er hat ja keinen Nächsten  
+				result.append(firstDelimiter+title+"\n");
+				result.append(firstDelimiter+columnNames+"\n");
+				}
+			}
+		}	
+	}
+	return result.toString();
+}
+
+static String generateSelectionDisplay (TreePath [] tp, String separator, boolean includeSubTrees){
+
+	if (tp==null ||tp.length==0) return null;
+	if (tp.length==1 && ((DefaultMutableTreeNode)(tp[0].getLastPathComponent())).getUserObject() instanceof String)
+		return ((DefaultMutableTreeNode)(tp[0].getLastPathComponent())).getUserObject().toString();
+	StringBuilder result=new StringBuilder("");
+	String firstDelimiter="";
+	String title=null;
+	boolean []isResultColumn = null;
+	StringBuilder columnNames=new StringBuilder();
+	LinkedList<DataNode> selectedNodes = new LinkedList<DataNode>();
+int levelOffset=9999, level=0;
+	   for (int t=0;t<tp.length;t++){
+		   DefaultMutableTreeNode selNode= (DefaultMutableTreeNode)(tp[t].getLastPathComponent()); 
+		   if  (selNode.getUserObject() instanceof DataNode){
+			   selectedNodes.add( (DataNode)(selNode.getUserObject()) );
+			   if (levelOffset >((DefaultMutableTreeNode)(tp[t].getLastPathComponent())).getLevel() )
+				   levelOffset=((DefaultMutableTreeNode)(tp[t].getLastPathComponent())).getLevel(); //Der der Wurzel nächste Level wird gesucht, dieser wird dann allen levels abegezogen damit Selektionen mit hohen Level-Zahl nicht zuviele Separatoren links von ihnen bekommen und dadurch zu weit rechts angezeigt werden     
+		   }
+	   }
+	for (int i=0;i<selectedNodes.size();i++){
+		level = (((DefaultMutableTreeNode)(tp[i].getLastPathComponent())).getLevel()-levelOffset)/2; //Geteilt durch zwei, weil jede Ebene aus zwei levels besteht Label+Daten
+		firstDelimiter=multiplyChars(separator.charAt(0),level+1);
+		
+		if (!selectedNodes.get(i).isLabel && selectedNodes.get(i).getParent()!=null){
+			if (title==null || title.equals(selectedNodes.get(i).getParent().values) == false){
+				//Table Title
+				title=selectedNodes.get(i).getParent().values;
+				result.append(firstDelimiter+title+"\n");
+				//Column Names
+				isResultColumn = selectedNodes.get(i).getIsResultColumn();
+				String[] columns = selectedNodes.get(i).getColumnArray();
+				for (int t=0;t<columns.length;t++){
+					if (isResultColumn[t])
+						columnNames.append(columns[t].replace(separator, ".")+separator);
+					}
+				columnNames.deleteCharAt(columnNames.length()-1);
+				result.append(firstDelimiter+columnNames+"\n");
+			}
+			//Values
+			result.append(firstDelimiter);
+			String[] values = selectedNodes.get(i).getValueArray();
+			for (int t=0;t<values.length;t++){
+				if (isResultColumn[t])
+					result.append(values[t].replace(separator, ".")+separator);
+			}
+			result.deleteCharAt(result.length()-1).append("\n");
+			if (includeSubTrees && !selectedNodes.get(i).getChildren().isEmpty())
+				{
+					for (DataNode subNode : selectedNodes.get(i).getChildren()){
+					result.append(generateTableDisplay(subNode,separator,includeSubTrees,level+2));
+					}
+				}	
+			}
+	}	
+		return result.toString();
+	}
+
+
+	static String multiplyChars(char ch, int multiplier){
+		StringBuilder result = new StringBuilder(ch);  	
+		for (int t=1;t<multiplier; t++){
+			result.append(ch);
+		}	
 return result.toString();	
 }
 	

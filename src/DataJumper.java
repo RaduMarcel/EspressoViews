@@ -8,7 +8,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.awt.event.*;
-
 import javax.swing.border.BevelBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.border.SoftBevelBorder;
@@ -16,10 +15,15 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.*;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.awt.*;
 import java.io.File;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.awt.Toolkit;
+
 public class DataJumper {
 private static Logger logger = LogManager.getLogger(DataJumper.class.getName());	
 //private static final long serialVersionUID = 1L;	
@@ -30,13 +34,14 @@ protected String viewOption ="detailed";
 protected boolean dataSuccess;
 List<AnfragePlan> allePlaene;
 protected JTree theGUITree;
-public boolean startDataJumper (
+
+public boolean startDataJumper (// Erzeugt und zeigt den EspressoView
 		final String dbType, final String connectionName, final String host,final String port,final String connType,final String serviceName, final String userName, 
 		final String password, final String file, final JDialog dialog) {
 
 final String defFileNameOnly=new File(file).getName();	
 //das Hauptfenster
-	final JFrame frame = new JFrame(defFileNameOnly+" : 	"+connectionName);
+	final JFrame frame = new JFrame(defFileNameOnly+":  "+connectionName);
 	frame.setVisible(true);
 	frame.setSize(1000, 750);
 	frame.setExtendedState(Frame.MAXIMIZED_BOTH );
@@ -51,7 +56,7 @@ final String defFileNameOnly=new File(file).getName();
 	splitPane.setDividerSize(13);
 	splitPane.resetToPreferredSizes();	
 //...oberen Teil, hier wird später der JTree eingepflanzt, davor aber wird er von dem progress message text besetzt  	
-	final JScrollPane scrollPaneTop =  new JScrollPane();
+	final JScrollPane scrollPaneTop = new JScrollPane();
 	final JTextArea txtProgressMessage = new JTextArea();
 	splitPane.setLeftComponent(scrollPaneTop);
     txtProgressMessage.setFont(new Font("Monospaced", Font.BOLD, 14));
@@ -70,7 +75,7 @@ final String defFileNameOnly=new File(file).getName();
 	txtwarningMessage.setCaretPosition(0);
 	txtwarningMessage.setEditable(false);		
 	frame.setContentPane(splitPane);
-	dialog.setVisible(false); //das log-in-Fenster verschwindet
+	dialog.setVisible(false); //das log-in-Fenster verschwindet von der Bühne
 	
 	//Menu Bar		
 			JMenuBar menuBar = new JMenuBar();
@@ -79,7 +84,7 @@ final String defFileNameOnly=new File(file).getName();
 			Color menuColor = new Color(0, 153, 255);
 			Font menuFont = new Font("Corbel", Font.BOLD, 16); 
 			Font menuItemFont = new Font("Corbel", Font.BOLD, 14);
-	//Menu File		
+		//Das Dateimenu		
 			JMenu dateiMenu = new JMenu("File");
 				dateiMenu.setBackground(menuColor);
 				dateiMenu.setFont(menuFont);
@@ -210,22 +215,6 @@ final String defFileNameOnly=new File(file).getName();
 			btnReload.setVisible(true);
 			btnReload.setBorder(new SoftBevelBorder(BevelBorder.RAISED, null, null, null, null));
 			menuBar.add(btnReload);
-			
-			frame.setVisible(true);
-
-		Thread queryThread = new Thread() {
-			public void run(){
-				final JScrollPane scrollPane = generateTheTree(dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,true);
-//			if (scrollPane==null) {
-//				frame.dispose();
-//				return false;	
-//			}			
-				splitPane.setLeftComponent(scrollPane);
-			}
-		};
-		queryThread.start();	
-
-			
 			btnReload.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					removeAllTreeComponents(frame,1);
@@ -247,12 +236,26 @@ final String defFileNameOnly=new File(file).getName();
 					btnCollapse.setVisible(true);
 				}
 			});
+			frame.setVisible(true);
+	Thread queryThread = new Thread() {
+		public void run(){
+			final JScrollPane scrollPane = generateTheTree(dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,true);
+//				if (scrollPane==null) {
+//					frame.dispose();
+//					return false;	
+//				}			
+				splitPane.setLeftComponent(scrollPane);
+			}
+		};
+queryThread.start();	//generateTheTree wird jetzt als paraleller thread gestartet 	
+			
 	return true;		
 } // Ende Main
 
 private JScrollPane generateTheTree(final String dbType, final String connectionName, final String host,final String port, final String connType,
 		final String serviceName, final String userName, final String password,
-		final String file, final JTextArea txtProgressgMessage, JTextArea txtwarningMessage, final JFrame frame, final JDialog dialog, final JTabbedPane tabbedPaneBottom, boolean refreshFlag) {
+		final String file, final JTextArea txtProgressgMessage, JTextArea txtwarningMessage, final JFrame frame, final JDialog dialog, final JTabbedPane tabbedPaneBottom, boolean refreshFlag) 
+{
 //JTree tree = null;
 	//this.allePlaene=null;
 	DefaultMutableTreeNode wurzel = null; 
@@ -279,9 +282,9 @@ txtProgressgMessage.append("Successfully connected to the datatabase.\n");
 		//******************************+überprüft die uniquness der query labels innerhlad der gesamten report definition
 		LinkedList<String> allQueryLabels = new LinkedList<String>();
 		HashSet<String> hashQueryLabels = new HashSet<String>();
-		for (AnfragePlan basePlan:allePlaene) {
+		for (AnfragePlan basePlan:allePlaene) {//Die Uniqueness der Querylabels und auch, welche Labels mehrfach vergeben sind, wird geprüft   
 			allQueryLabels.add(basePlan.getQueryName());
-			hashQueryLabels.add(basePlan.getQueryName());
+			hashQueryLabels.add(basePlan.getQueryName());//in einem hashSet kann jeder Wert nur einmal als Element gep
 		}
 		for (String label: hashQueryLabels){
 			allQueryLabels.remove(label);
@@ -330,7 +333,7 @@ txtProgressgMessage.append("Begin to query the datatabase\n");
 	}
 	try{		
 		dataSuccess=true;
-		dataSuccess= allePlaene.get(0).generateData(conn,txtProgressgMessage);
+		dataSuccess= allePlaene.get(0).generateData(conn,txtProgressgMessage);// von der wurzel aus wird der datenbaum generiert
 		if (!dataSuccess) {
 			warnings.delete(0, warnings.length());
 			txtProgressgMessage.append("\n\nData retrieval ended with error!");
@@ -350,7 +353,7 @@ long dataRetrivalFinished =  new Date().getTime();
 txtProgressgMessage.append("Database retrieval ended without errors in "+((float)(dataRetrivalFinished - defintionFileParsed)/1000)+" seconds\n");
 logger.info("Data display phase starts producing the view option "+viewOption);
 txtProgressgMessage.append("Start to generate the report display.\n");
-//An diesem Punkt existiert eine Anfrage-hierarchie mit angehängten Datenblöcken. Ab jetzt werden die einzelnen Datenzeilen zu einem Datenbaum verschachtelt.  
+//An diesem Punkt existiert eine Anfrage-hierarchie mit angehängten Datenblöcken. Ab jetzt werden die einzelnen Datenzeilen zu einem Jtree Datenbaum verschachtelt.  
 	try{		
 		if (viewOption.equals("detailed")||viewOption.equals("compact")){
 			wurzel = DisplayData.generateJointDisplay(allePlaene.get(0),"Definition File "+new File(file).getName()+ " applied on "+connectionName+". Captured on "+Calendar.getInstance().getTime().toString(),viewOption);
@@ -366,92 +369,98 @@ long dataTreeGenerated =  new Date().getTime();
 		logger.info("The generation of the graphical user interface started");
 		model = new DefaultTreeModel(wurzel);
 		final JTree tree = new JTree(model);
+		 tree.addKeyListener(new KeyAdapter(){
+			@Override 
+	        public void keyReleased(KeyEvent event) { 
+	                if ( event.isControlDown() && event.getKeyCode()==KeyEvent.VK_C){ //Ctrl+C ist gedrückt
+	                 TreePath []  tp=tree.getSelectionPaths();
+	       			 String select="";
+	                 if (tp.length>0)
+	       				 select = DisplayData.generateSelectionDisplay(tree.getSelectionPaths(), "\t",false);
+	                	 Toolkit.getDefaultToolkit().getSystemClipboard().setContents( new StringSelection(select), null);
+	                 }
+			}
+		 }
+		);
 		renderer = new ResultLineRenderer();
 		//  renderer.setClosedIcon(null);
 		tree.setCellRenderer(renderer);
-		
-		final JPopupMenu popupTreeChoice = new JPopupMenu(); //Popup menue for right klick 
-        JMenuItem mi = new JMenuItem("Add a restriction");
-        mi.setActionCommand("addRestriction");
-        popupTreeChoice.add(mi);
-        mi = new JMenuItem("Open in a table");
-        mi.setActionCommand("tableView");
-        popupTreeChoice.add(mi);  
-        popupTreeChoice.setOpaque(true);
-        popupTreeChoice.setLightWeightPopupEnabled(false);
-        
+
         tree.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent arg0) {
-				if (1==2 && arg0.getButton()==MouseEvent.BUTTON3){//if right-clicked, but switched off for the moment 
-					int selRow = tree.getRowForLocation(arg0.getX(), arg0.getY());
-			         TreePath selPath = tree.getPathForLocation(arg0.getX(), arg0.getY());
-			         DataNode selectedDataNodeLabel =null;
-			                 if (selRow>-1){
-			                	 popupTreeChoice.show( (JComponent)arg0.getSource(), arg0.getX(), arg0.getY() );
-			                	 
-			                	tree.setSelectionPath(selPath); 
-			                    tree.setSelectionRow(selRow);
-			                    String nextLabel = "";
-			                    DefaultMutableTreeNode currNode= (DefaultMutableTreeNode)(selPath.getLastPathComponent());
-			                    if (currNode.getUserObject() instanceof DataNode){
-			                    	selectedDataNodeLabel = (DataNode)(currNode.getUserObject()); 
-			                    	if (selectedDataNodeLabel.isLabel && selectedDataNodeLabel.getParent()!=null)
-			                    		nextLabel= selectedDataNodeLabel.values;
-			                    	else{
-			                    		if (selectedDataNodeLabel.getParent()!=null ){
-			                    			selectedDataNodeLabel=selectedDataNodeLabel.getParent();
-			                    			nextLabel= selectedDataNodeLabel.values;
-			                    		}			                    		
-			                    	}
-			                    }
-			                    if (currNode.getUserObject() instanceof String){
-			                    	if (currNode.getNextNode().getUserObject() instanceof DataNode){
-			                    		selectedDataNodeLabel = ((DataNode)(currNode.getNextNode().getUserObject())).getParent();
-			                    		nextLabel=selectedDataNodeLabel.values;
-			                    	//			(String)(currNode.getUserObject());	
-			                    	}
-			                    	//tableModel= new DefaultTableModel			                    	
-			                    }
-			                  if (selectedDataNodeLabel!=null){
-			                	  String[] columnName = selectedDataNodeLabel.getChildren().get(0).getColumnArray(true);
-			                	  String[][]columnData = new String [selectedDataNodeLabel.getChildren().size()-1][columnName.length];
-			                	  for (int t=1;t<selectedDataNodeLabel.getChildren().size()-1;t++){
-			                		  columnData[t-1]= selectedDataNodeLabel.getChildren().get(t).getValueArray(true);
-			                	  }
-			                	  JTable dataTable = new JTable(columnData, columnName);
-			                	  dataTable.setFillsViewportHeight(true);
-			                	  JScrollPane scrollPane = new JScrollPane(dataTable);
-			                	  tabbedPaneBottom.add(nextLabel ,scrollPane);
-			                	  dataTable.setRowSelectionAllowed(false);
-			                	  dataTable.setCellSelectionEnabled(true);
-			                	  dataTable.setColumnSelectionAllowed(true);
-//			                	  int index = tabbedPaneBottom.indexOfTab(nextLabel);
-//			                	  JPanel pnlTab = new JPanel(new GridBagLayout());
-//			                	  pnlTab.setOpaque(false);
-//			                	  JLabel lblTitle = new JLabel(nextLabel);
-//			                	  JButton btnClose = new JButton("x");
-//			                	  GridBagConstraints gbc = new GridBagConstraints();
-//			                	  gbc.gridx = 0;
-//			                	  gbc.gridy = 0;
-//			                	  gbc.weightx = 1;
-//			                	  pnlTab.add(lblTitle, gbc);
-//			                	  gbc.gridx++;
-//			                	  gbc.weightx = 0;
-//			                	  pnlTab.add(btnClose, gbc);
-//			                	  tabbedPaneBottom.setTabComponentAt(index, pnlTab);
-			                	  for (int t=0; t< frame.  getComponentCount();t++){
-			                		  System.out.println(t+"  "+frame.getComponent(t));  
-			                		  
-			                	  }
-			                	  
-			                	  
-			                    }
+				if (//1==2 && 
+						arg0.getButton()==MouseEvent.BUTTON3){//if right-clicked, but switched off for the moment 
+					int selRow = tree.getRowForLocation(arg0.getX(), arg0.getY());//
+			         TreePath selPath = tree.getPathForLocation(arg0.getX(), arg0.getY()); //beide, selection row und selection path, sind notwending, um zu bestimmen welchen Punkt auf dem Baum angeklickt wurde.
+			         
+//			         DataNode selectedDataNodeLabel =null;
+			                 if (selRow > -1 && viewOption.equals("detailed")){//selRow>-1 bedeutet, der Mausklick hat auf dem Java Swing Baum stattgefunden
+			                	 RightClickOptionMenu rightClickOptionMenu  = new RightClickOptionMenu(tree,selPath,allePlaene);
+			                	 rightClickOptionMenu.popupTreeChoice.show( (JComponent)arg0.getSource(), arg0.getX(), arg0.getY() );//ein dropdown menu wird an der Klickstelle ausgefahren 
+			                	
+//			                	Show Table Option 
+//			                	 String nextLabel = "";
+//			                    DefaultMutableTreeNode currNode= (DefaultMutableTreeNode)(selPath.getLastPathComponent()); 
+//			                    if (currNode.getUserObject() instanceof DataNode){
+//			                    	selectedDataNodeLabel = (DataNode)(currNode.getUserObject()); 
+//			                    	if (selectedDataNodeLabel.isLabel && selectedDataNodeLabel.getParent()!=null)
+//			                    		nextLabel= selectedDataNodeLabel.values;
+//			                    	else{
+//			                    		if (selectedDataNodeLabel.getParent()!=null ){
+//			                    			selectedDataNodeLabel=selectedDataNodeLabel.getParent();
+//			                    			nextLabel= selectedDataNodeLabel.values;
+//			                    		}			                    		
+//			                    	}
+//			                    }
+//			                    if (currNode.getUserObject() instanceof String){
+//			                    	if (currNode.getNextNode().getUserObject() instanceof DataNode){
+//			                    		selectedDataNodeLabel = ((DataNode)(currNode.getNextNode().getUserObject())).getParent();
+//			                    		nextLabel=selectedDataNodeLabel.values;
+//			                    	//			(String)(currNode.getUserObject());	
+//			                    	}
+//			                    tableModel= new DefaultTableModel			                    	
+//			                    }
+//			                  if (selectedDataNodeLabel!=null){
+//			                	  String[] columnName = selectedDataNodeLabel.getChildren().get(0).getColumnArray(true);
+//			                	  String[][]columnData = new String [selectedDataNodeLabel.getChildren().size()-1][columnName.length];
+//			                	  for (int t=1;t<selectedDataNodeLabel.getChildren().size()-1;t++){
+//			                		  columnData[t-1]= selectedDataNodeLabel.getChildren().get(t).getValueArray(true);
+//			                	  }
+//			                	  JTable dataTable = new JTable(columnData, columnName);
+//			                	  dataTable.setFillsViewportHeight(true);
+//			                	  JScrollPane scrollPane = new JScrollPane(dataTable);
+//			                	  tabbedPaneBottom.add(nextLabel+(tabbedPaneBottom.getTabCount()+1),scrollPane);
+//			                	  dataTable.setRowSelectionAllowed(false);
+//			                	  dataTable.setCellSelectionEnabled(true);
+//			                	  dataTable.setColumnSelectionAllowed(true);
+////			                	  int index = tabbedPaneBottom.indexOfTab(nextLabel);
+////			                	  JPanel pnlTab = new JPanel(new GridBagLayout());
+////			                	  pnlTab.setOpaque(false);
+////			                	  JLabel lblTitle = new JLabel(nextLabel);
+////			                	  JButton btnClose = new JButton("x");
+////			                	  GridBagConstraints gbc = new GridBagConstraints();
+////			                	  gbc.gridx = 0;
+////			                	  gbc.gridy = 0;
+////			                	  gbc.weightx = 1;
+////			                	  pnlTab.add(lblTitle, gbc);
+////			                	  gbc.gridx++;
+////			                	  gbc.weightx = 0;
+////			                	  pnlTab.add(btnClose, gbc);
+////			                	  tabbedPaneBottom.setTabComponentAt(index, pnlTab);
+//			                	  for (int t=0; t< frame.  getComponentCount();t++){
+//			                		  System.out.println(t+"  "+frame.getComponent(t));  
+//			                		  
+//			                	  }
+//			                	  
+//			                	  
+//			                    }
 								
 			                 }
 				}
 			}
 		});
+        
 		final JScrollPane scrollPane = new JScrollPane(tree);
 		scrollPane.setOpaque(true);
 		//tree.setBackground(new Color(204, 204, 250));
@@ -475,17 +484,13 @@ long GUIGenerated =  new Date().getTime();
 //			@Override
 //			public void keyPressed(KeyEvent arg0) {
 //				//System.out.println(arg0.getKeyCode());
-//				if (arg0.getKeyCode() == 116){ 
+//				if (arg0.getKeyCode() == 116){ //F5 zum reloaden
 //				frame.remove(scrollPane);
 //				generateDetailedTree (host,serviceName, userName, password, file, frame);
 //				}
 //			}
 //		});		
 		//Text zum appenden
-//		if (warnings.length()>0) {
-//			WarningMessage.showWarning(warnings.toString());
-//			warnings.delete(0, warnings.length());
-//		}
 		if (warnings.length()>0) 
 			warnings.insert(0, "Report validation warnings:\n\n");
 		txtwarningMessage.setText(txtProgressgMessage.getText()+"\n"+				
@@ -591,6 +596,195 @@ static boolean containsCaseInsensitive (Collection<String> haufen, String teil )
 //	}
 //}
 
+class RightClickOptionMenu extends JPopupMenu{
+	private static final long serialVersionUID = 1L;
+	final JPopupMenu popupTreeChoice;	
+	final JTree tree;
+	final TreePath selPath;
+	final List<AnfragePlan> allePlaene;
+	
+	RightClickOptionMenu(JTree theTree,TreePath selPath, List<AnfragePlan> allePlaene){
+	MenuItemListener menuItemListener = new MenuItemListener();
+	this.tree=theTree;
+	this.selPath=selPath;
+	this.allePlaene = allePlaene;
+	DefaultMutableTreeNode currNode= (DefaultMutableTreeNode)(selPath.getLastPathComponent()); 
+	popupTreeChoice = new JPopupMenu(); //Popup menu für den Klick auf der rechten Maustaste 
+	JMenuItem mi = null;
+
+	if (currNode.isRoot()==false && tree.getSelectionCount()==1){	
+	mi=	new JMenuItem("Add Filter (TODO)");	
+    mi.setActionCommand("addFilter");
+    mi.setEnabled(false);
+    //mi.addActionListener(menuItemListener);
+    popupTreeChoice.add(mi);
+	
+    mi = new JMenuItem("Copy SQL to clipboard");
+    mi.setActionCommand("copySQL");
+    //mi.setEnabled(false);
+    mi.addActionListener(menuItemListener);
+    popupTreeChoice.add(mi);
+
+    mi = new JMenuItem("Open in a new table (TODO)");
+    mi.setActionCommand("tableView");
+    mi.setEnabled(false);
+    //mi.addActionListener(menuItemListener);
+    popupTreeChoice.add(mi);
+    popupTreeChoice.add( new JSeparator());
+    }
+	
+	mi = new JMenuItem("Copy selection to clipboard (tab separated)");
+    mi.setActionCommand("SelecCopyTab");
+    mi.addActionListener(menuItemListener);
+    popupTreeChoice.add(mi);
+    
+    mi = new JMenuItem("Copy selection to clipboard (comma separated)");
+    mi.setActionCommand("SelecCopyComma");
+    mi.addActionListener(menuItemListener);
+    popupTreeChoice.add(mi); 
+    
+
+    mi = new JMenuItem("Copy selection and all sub-records to clipboard (tab separated)");
+    mi.setActionCommand("SelecCopySubTab");
+    mi.addActionListener(menuItemListener);
+    popupTreeChoice.add(mi);
+    
+    if (currNode.isRoot()==false){	
+    mi = new JMenuItem("Copy selection and all sub-records to clipboard (comma separated)");
+    mi.setActionCommand("SelecCopySubComma");
+    mi.addActionListener(menuItemListener);
+    popupTreeChoice.add(mi); 
+   
+    popupTreeChoice.add( new JSeparator());
+    }
+    mi = new JMenuItem("Copy table to clipboard (tab separated)");
+    mi.setActionCommand("TableCopyTab");
+    mi.addActionListener(menuItemListener);
+    popupTreeChoice.add(mi);
+    
+    if (tree.getSelectionCount()==1 && currNode.isRoot()==false){
+    mi = new JMenuItem("Copy table to clipboard (comma separated)");
+    mi.setActionCommand("TableCopyComma");
+    mi.addActionListener(menuItemListener);
+    popupTreeChoice.add(mi);  
+    
+    mi = new JMenuItem("Copy table and all sub-records to clipboard (tab separated)");
+    mi.setActionCommand("TableCopySubTab");
+    mi.addActionListener(menuItemListener);
+    popupTreeChoice.add(mi);
+    
+    mi = new JMenuItem("Copy table and all sub-records to clipboard (comma separated)");
+    mi.setActionCommand("TableCopySubComma");
+    mi.addActionListener(menuItemListener);
+    popupTreeChoice.add(mi);
+    }
+    popupTreeChoice.setOpaque(true);
+    popupTreeChoice.setLightWeightPopupEnabled(false);
+	}
+
+	class MenuItemListener implements ActionListener {
+		  public void actionPerformed(ActionEvent e) {
+			  DefaultMutableTreeNode currNode= (DefaultMutableTreeNode)(selPath.getLastPathComponent()); 
+              DataNode selectedDataNodeLabel=null;
+			  String selection = null;
+            
+			if (e.getActionCommand().contains("copySQL")){
+				String dataNodeLabel="";
+				boolean labelSelection=false;
+				DataNode criteriaNode = null;
+				List<TransmittedCondition>transmConditions=null;
+				String originalSql="";
+				String finalSql="";
+				StringBuilder whereClause=new StringBuilder();
+				String operator="=";
+				String varcharDelimiter="'";
+				if (currNode.getUserObject() instanceof DataNode){
+					criteriaNode=(DataNode)(currNode.getUserObject());
+				}
+				
+				if (currNode.getUserObject() instanceof String){
+					dataNodeLabel=(String)(currNode.getUserObject());
+					labelSelection=true;
+					if ( ((DefaultMutableTreeNode) currNode.getParent()).getUserObject() instanceof DataNode )
+						criteriaNode=(DataNode)(((DefaultMutableTreeNode) currNode.getParent()).getUserObject());
+				}
+				
+				if (labelSelection==false){
+					dataNodeLabel=criteriaNode.getParent().getValues();
+				}	
+				for (AnfragePlan a : allePlaene){
+					if (a.getQueryName().equals(dataNodeLabel) ){//query label is gleich dem label des ausgewählten nodes
+						originalSql=a.getSqlQuery();
+						transmConditions=a.transmittedConditions;
+						break;
+					}
+				}
+				if (labelSelection==false){//Node Selection
+					for (int t=0;t<criteriaNode.getColumnArray().length && t<15;t++){
+						if (criteriaNode.getValueArray()[t].equals("null")){
+							operator="is";
+							varcharDelimiter="";
+							}
+						else{
+							operator="=";
+							varcharDelimiter="'";
+							}
+						whereClause.append("\n\tAND "+criteriaNode.getColumnArray()[t]+" "+operator+" "+varcharDelimiter+criteriaNode.getValueArray()[t]+varcharDelimiter);
+					}
+				}
+				else{//Label Selection
+					if (criteriaNode!=null&& criteriaNode.getColumnArray().length>0)  
+					for (TransmittedCondition transmCondition:transmConditions){
+						if (transmCondition.inheritanceIsNotApplicable()==false){
+							for (int t=0;t<criteriaNode.getColumnArray().length;t++){
+								if(transmCondition.getIdentifier().equals(criteriaNode.getColumnArray()[t].toUpperCase()))
+									whereClause.append("\n\tAND "+criteriaNode.getColumnArray()[t]+" "+operator+" "+varcharDelimiter+criteriaNode.getValueArray()[t]+varcharDelimiter);
+							}
+						}
+					}
+				}
+				finalSql="select * from ("+originalSql+")a\nWhere " + whereClause.toString().replaceFirst("AND ", "")+";";
+//				System.out.println(a.getSqlQuery()+"\n"+a.getTransmittedConditionAttributes()+"\n"+finalSql	);
+				if (whereClause.length()>0)
+					selection=finalSql;
+				else
+					selection = originalSql+";";
+			}	  
+            String separator=null;
+            boolean addSub=false;
+            if (e.getActionCommand().endsWith("Tab"))
+            	separator="\t";
+            else 
+            	separator=",";
+            if (e.getActionCommand().contains("Sub"))
+            	addSub=true;
+            
+           if (e.getActionCommand().contains("TableCopy")){
+			  if (currNode.getUserObject() instanceof DataNode){
+              	selectedDataNodeLabel = (DataNode)(currNode.getUserObject()); 
+              	if (selectedDataNodeLabel.isLabel==false && selectedDataNodeLabel.getParent()!=null )
+              		selectedDataNodeLabel=selectedDataNodeLabel.getParent();
+              	}
+              
+              if (currNode.getUserObject() instanceof String){
+              	 if (currNode.getNextNode().getUserObject() instanceof DataNode)
+              		selectedDataNodeLabel = ((DataNode)(currNode.getNextNode().getUserObject())).getParent();
+              }
+              selection = DisplayData.generateTableDisplay(selectedDataNodeLabel, separator,addSub,1);
+           }
+            
+           if (e.getActionCommand().contains("SelecCopy")){
+             TreePath []  tp=tree.getSelectionPaths();
+			 if (tp.length>0)
+				selection = DisplayData.generateSelectionDisplay(tree.getSelectionPaths(), separator,addSub);
+			 }
+			  if (selection!=null){
+			  Toolkit.getDefaultToolkit().getSystemClipboard().setContents( new StringSelection(selection), null);//add result to clipboard
+			  }
+//		    System.out.println("Selected: " + e.getActionCommand()+"\nAngelicktes Baumelement: "+selectedDataNodeLabel);    
+		  }
+		}
+} 
 
 class ResultLineRenderer extends DefaultTreeCellRenderer implements TreeCellRenderer{
 	  /**

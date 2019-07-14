@@ -7,8 +7,8 @@ class DataNode {
 	private LinkedList<DataNode> children = new LinkedList<DataNode>();
 	private boolean[] isResultColumn;
 	String values,columns, viewOption;
-	private String[] valueArray;
-	private String[] columnArray;	
+	private String[] valueArray, resultValueArray;
+	private String[] columnArray, resultColumnArray;	
 	int childNumber; 
 	Map<String,Integer> maxColumnLength;
 	boolean isLabel;
@@ -90,6 +90,10 @@ class DataNode {
 	}
 	LinkedList<DataNode> getChildren() {
 		return children;
+	}
+	DataNode getFirstChild(){
+		LinkedList<DataNode> children = this.getChildren();
+		return children.getFirst();
 	}
 
 	DataNode insertOnLevel(DataNode child) {
@@ -189,12 +193,19 @@ void determinetMaxColumnLength(DataNode node){
 	
 	public String[] getValueArray() {return valueArray;}
 	
-	public String[] getValueArray(boolean resultSetColumnsOnly) {
+	public String[] getValueArray(boolean resultSetColumnsOnly){
+		if (this.resultValueArray == null)
+			setValueArray(resultSetColumnsOnly);
+	return this.resultValueArray; 
+	}
+	
+	private void setValueArray(boolean resultSetColumnsOnly) {//only user selected columns are selected
+
 	if(this.isResultColumn==null){
-		this.isResultColumn= new boolean[valueArray.length];
-		for (int t=0;t<valueArray.length; t++){
-			this.isResultColumn[t]=true;
-			}
+	this.isResultColumn= new boolean[valueArray.length];
+	for (int t=0;t<valueArray.length; t++){
+		this.isResultColumn[t]=true;
+		}
 	}
 	int counter=0;
 	for (int t=0;t<this.isResultColumn.length;t++)
@@ -207,12 +218,18 @@ void determinetMaxColumnLength(DataNode node){
 			adjustedValueArray[counter]=this.getValueArray()[t];
 			counter++;
 		}
-	return adjustedValueArray;
+	this.resultValueArray = adjustedValueArray;
 	}
 	
 	public String[] getColumnArray() {return columnArray;}
 	
-	public String[] getColumnArray(boolean resultSetColumnsOnly) {
+	public String[] getColumnArray(boolean resultSetColumnsOnly){
+		if (this.resultColumnArray == null)
+			setColumnArray(resultSetColumnsOnly);
+	return this.resultColumnArray; 
+	}
+	
+	private void setColumnArray(boolean resultSetColumnsOnly) {
 		
 	if(this.isResultColumn==null){//nur für alle Fälle 
 		this.isResultColumn= new boolean[valueArray.length];
@@ -231,7 +248,7 @@ void determinetMaxColumnLength(DataNode node){
 			adjustedColumnArray[counter]=this.getColumnArray()[t];
 			counter++;
 		}
-		return adjustedColumnArray;
+	this.resultColumnArray = adjustedColumnArray;
 	}
 	
 	public int getRowLength(){

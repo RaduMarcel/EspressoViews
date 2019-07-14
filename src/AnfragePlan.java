@@ -43,7 +43,9 @@ public class AnfragePlan {
 	public String toString() {
 		return this.sqlQueryLabel;
 	}
-	
+	public String getSqlQuery() {
+		return sqlQuery;
+	}
 	public AnfragePlan getSuperSQLQuery() {
 		return superSQLQuery;
 	}
@@ -457,10 +459,17 @@ String getDisplayData=null,SQLExecutionFeedback=null;
 			String res="";
 			while (rowNum<=maxRowNum && rs.next()){
 			try{	
-				res =rs.getString(resultRowsMatrix[colNum][0]);//jede zeile hat column name
+				res =rs.getString(resultRowsMatrix[colNum][0]);//jede zeile hat column names
 				resultRowsMatrix[colNum][rowNum]=res;
-				if (res!=null && res !="") 
-						res.replaceAll("\\*", ".*");
+				if (res!=null && res.length() > 0) 
+					 resultRowsMatrix[colNum][rowNum].replaceAll("\\*", ".*");
+				else 
+					if (res.length() == 0 && conn.getMetaData().getDatabaseProductName().toLowerCase().contains("mysql") )
+						//bei MySql gibt es einen Unterschied zwischen Empty String '' und null, demnach egibt die where clause a='' true wenn a='' 
+						//Bei Oracle gibt's das nicht so, Empty String wird wie null behandelt uns so ergibt a='' sie wie auch bei null unknown, und also false      
+						resultRowsMatrix[colNum][rowNum]="";
+					else
+						resultRowsMatrix[colNum][rowNum]="null";
 			}catch (Exception e) {
 				logger.error("rowNum "+rowNum+" colNum "+colNum +" rs.getString(resultRowsMatrix[colNum][0]) = "+res);
 				logger.error(e.getStackTrace());
@@ -510,8 +519,7 @@ static String generateTempTable(Connection conn, AnfragePlan anfrage) {
 			logger.info("Temporary Table Schema "+ anfrage.allResultColumns);
 		}
 		
-		if (conn.getMetaData().getDatabaseProductName().toLowerCase()
-				.contains("mysql"))//create a temporary table in mysql
+		if (conn.getMetaData().getDatabaseProductName().toLowerCase().contains("mysql"))//create a temporary table in mysql
 		{
 			String[] types ={"TABLE"};
 			ResultSet rs= db.getTables(null, db.getUserName(), "XVW$%",types);

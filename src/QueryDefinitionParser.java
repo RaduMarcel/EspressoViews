@@ -259,6 +259,8 @@ public static void addConnectionDetailsToDefFile(String filePath, Map<String,Str
 		newConnection.getLastChild().appendChild(doc.createTextNode(connDet.get("SERVICENAME")));
 	newConnection.appendChild(doc.createElement("host"));
 		newConnection.getLastChild().appendChild(doc.createTextNode(connDet.get("HOST")));
+	newConnection.appendChild(doc.createElement("port"));
+		newConnection.getLastChild().appendChild(doc.createTextNode(connDet.get("PORT")));			
 	newConnection.appendChild(doc.createElement("userName"));
 		newConnection.getLastChild().appendChild(doc.createTextNode(connDet.get("USERNAME")));
 	if (getElementByTagName(doc,"DBConnectionDefinition") !=null){
@@ -447,7 +449,10 @@ protected static Document getXmlDocument(String filePath) {
 	 static List<AnfragePlan> convertXMLExtraktToAnfragePlan (List<Map<String,String>> xmlExtrakt){
 		List<AnfragePlan> result = new LinkedList<AnfragePlan>();		
 		for (Map<String,String> queryDef: xmlExtrakt){		
-			String query = queryDef.get("SQLQUERY").replace(";", ""); 
+			String query = queryDef.get("SQLQUERY").trim();
+			while (query.charAt(query.length()-1)==';'){//Wenn eine query mit einem oder mehrere ; enden, dann müssen diese vor der Ausführung beseitigt werden
+				query=query.substring(0, query.length()-1).trim();				
+			}
 			String queryLabel = queryDef.get("SQLQUERYLABEL").trim(); 
 			String suppressDisplayIfNoData = queryDef.get("SUPPRESSDISPLAYIFNODATA"); 
 			String maximumResultRows = queryDef.get("MAXRESULTROWS");
