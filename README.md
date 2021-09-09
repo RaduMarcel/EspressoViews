@@ -5,7 +5,7 @@
 
 - EspressoViews merges the results of many SQL statements and displays them in a data tree, which can be expanded and collapsed by the user. 
 
-- Its human friendly [approach][Ideas] allows you to connect a, theoretically, unlimited number SQLs to a report as simple as adding phrases to a text.  
+- It is [designed][Ideas] to connect a theoretically unlimited number SQLs to a report as simple as adding phrases to a text.  
 
 - More About? Check the [Wiki][Wiki] pages!
 
@@ -26,17 +26,6 @@ You should first [read how to define an EspressoViews report][ReportDef] and the
 [Ideas]: https://github.com/RaduMarcel/EspressoViews-/wiki/2.-The-main-ideas-behind-this-tool
 [Reportref]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
 [Wiki]: https://github.com/RaduMarcel/EspressoViews/wiki
-
-### Maintain the human readability without reducing the complexity and/or the amount of data.
-
-EspressoViews first runs all SQL queries as specified in the report definition file without prior filtering by the user. 
-The first data shown to the user is the result of the root query. This first query should or can be used as a summary or as an introduction for the rest of the data tree. The user then decides which meaningful "data path" to follow further down.
-
-Though, a graphical user interface for filtering prior to and after the data retrieval is in some cases still necessary and will be supported in the future as optional features.
-
-
-There is a lot of space to improve funtionality and user experience. You are welcome [to contribute][Contributing] with your feedback, ideas and/or coding experience and help this project to evolve.
-But the way, this tool supports only Oracle and MySQL DBMS.
 
 
 ### What is required to give it a try? 
@@ -60,6 +49,7 @@ If the application has started correctly, then you should be able to see this da
 ![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsInstall.png)
 
 
+As of now this tool supports Oracle and MySQL.
 
 Now, to use and generate an EspressoViews report you need:
 
@@ -79,9 +69,9 @@ If you replace the JDBC driver packages then make sure the new driver file name 
 
 **3. Press the OK Button on the bottom to generate the report**
 
-
 ## Contributing
 
+There is a lot of space to improve funtionality and user experience. You are welcome [to contribute][Contributing] with your feedback, ideas and/or coding experience and help this project to evolve.
 There are many ways to [contribute][Contributing] to this open source project. 
 
 [Contributing]: https://github.com/RaduMarcel/EspressoViews/blob/master/CONTRIBUTING.md
