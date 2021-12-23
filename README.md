@@ -1,7 +1,7 @@
 # EspressoViews
 
 
-- EspressoViews is a standalone Java tool for reporting and analysis of data stored on relational databases (RDBMS).
+- EspressoViews is a standalone Java tool for reporting and analysis of data stored on relational databases (Oracle and MySQL).
 
 - EspressoViews merges the results of many SQL statements and displays them in a data tree, which can be expanded and collapsed by the user. 
 
