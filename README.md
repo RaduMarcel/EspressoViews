@@ -20,7 +20,7 @@ You should first [read how to define an EspressoViews report][ReportDef] and the
 
 - A report unit is built around a single SQL query. The above example is made of three units, but theoretically there is no limitation as long as the whole structure is a tree structure. 
 
-- Any report definition file can be on his side embedded in another report definition file. Also here there is not  is no limitation as long as the linked files are defining a tree structure
+- Any report definition file can be on his side embedded in another report definition file. Also here there is no limitation as long as the linked files are defining a tree structure
 
 
 [Ideas]: https://github.com/RaduMarcel/EspressoViews-/wiki/2.-The-main-ideas-behind-this-tool
