@@ -46,8 +46,6 @@ If the application has started correctly, then you should be able to see this da
 ![](https://github.com/RaduMarcel/EspressoViews-/blob/master/DocImg/EspressoViewsInstall.png)
 
 
-As of now this tool supports Oracle and MySQL.
-
 
 **2. An XML report definition file.**
 
@@ -58,6 +56,7 @@ This definition file is made of your SQLs queries and of instructions, which spe
 
 **3. The connection credentials for a (Oracle or MySQL) database server**
 
+As of now this tool supports Oracle and MySQL.
 The `EspressoViews.zip` file contains the JDBC driver packages for the suported database server. They are placed in the folder `EspressoViews_vx.xx_lib`. The provided JDBC diver for Oracle databases works at least with the Oracle Versions between 12.1 and 21.1 and the JDBC driver for MySQL databases works at least with the MySQL versions 5.6, 5.7 and 8.0
 These drivers can be also downloaded from internet and you should do so if the version provided is not compatible with the database system version you try to access.
 In that case replace or add the downloaded JDBC driver package in the EspressoViews_vx.xx_lib folder, then open the MANIFEST.MF file of the `EspressoViews.jar` package and then replace the current driver package file name with  new driver package file name in the class path defintion (for instance replace ojdbc8.jar with ojdbc10.jar).  
