@@ -48,7 +48,7 @@ public class ErrorMessage extends JDialog {
 	
 	static String showStackTrace( StackTraceElement[] stacky){
 		StringBuilder allMessages = new StringBuilder();
-		for (int t=0;t<stacky.length && t<=6;t++ )
+		for (int t=0;t<stacky.length;t++ )
 						allMessages.append(stacky[t].toString()+"\n");
 		return allMessages.toString();	
 	}

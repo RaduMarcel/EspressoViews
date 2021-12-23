@@ -66,10 +66,11 @@ public class AboutWindow extends JDialog {
 		dtrpnhalloconvertMe.setText("<html>\r\n</head>\r\n" +
 								    "<body style=\"background: transparent\">\r\n" +
 								    "<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\n<font face=\"Times New Roman, serif\"><font size=\"6\" style=\"font-size: 24pt\"><b>Espresso\r\nViews</b></font></font>" +
-								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nVersion 0.60 \r\n" +
-								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nlast changed: Marburg, Germany, Juni 2019</p>\r\n" +
-								    "<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nCopyright <font face=\"Liberation Serif, serif\">&copy; Radu-Marcel\r\nDumitru</font>" +
-								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\n<font face=\"Liberation Serif, serif\">" +
+								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nVersion 0.61.0 \r\n" +
+								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nlast changed: Marburg, Germany, December 2021</p>\r\n" +
+								    "<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nCopyright <font face=\"Liberation Serif, serif\">&copy; Radu-Marcel\r\nDumitru</font></p>\r\n" +
+								    "<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">https://github.com/RaduMarcel/EspressoViews </font></p>\r\n" +
+								    "<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\n<font face=\"Liberation Serif, serif\">" +
 								    "This program is free software; you can redistribute it and/or modify it under the terms of the GNU GENERAL PUBLIC LICENSE, Version 3 as published by the Free Software Foundation on 29 June 2007</font></p>"+
 								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\n<font face=\"Liberation Serif, serif\">" +
 								    "This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more details.</font></p>\r\n</body>\r\n</html>" 
@@ -78,6 +79,31 @@ public class AboutWindow extends JDialog {
 		dtrpnhalloconvertMe.setBounds(0, 0, 616, 304);
 		dtrpnhalloconvertMe.setEditable(false);
 		contentPanel.add(dtrpnhalloconvertMe);
+		
+		{
+			JScrollPane panel = new JScrollPane();
+			tabbedPane.addTab("Tutorial", null, panel, null);
+				String  tutorialText =	"- For an introduction to this reporting tool visit:\n\thttps://github.com/RaduMarcel/EspressoViews/wiki/1.-Introduction\n\n"+
+										"- For the report definition language reference visit this page:\n\thttps://github.com/RaduMarcel/EspressoViews/wiki/4.-The-XML-report-definition-syntax";
+					
+				JTextArea tutorialTextArea = new JTextArea();
+				tutorialTextArea.setText(tutorialText);
+				tutorialTextArea.setEditable(false);
+				panel.setViewportView(tutorialTextArea);
+				tutorialTextArea.setCaretPosition(0);
+				panel.setBackground(Color.WHITE);
+				{
+					JTextArea textArea = new JTextArea();
+					panel.setColumnHeaderView(textArea);
+				}
+				{
+					JTextArea textArea = new JTextArea();
+					textArea.setFont(new Font("Liberation Serif", Font.PLAIN, 14));
+					textArea.setText("  ");
+					panel.setRowHeaderView(textArea);
+				}		
+		}
+		
 		{
 			JScrollPane panel = new JScrollPane();
 			tabbedPane.addTab("Licence", null, panel, null);
@@ -97,11 +123,11 @@ public class AboutWindow extends JDialog {
 		    	licenseText.append("You should have received a copy of the GNU General Public License along with this program;\n if not, see <http://www.gnu.org/licenses/>.");
 		    	logger.error("IO Exception occured while trying to load the file LICENCE\n"+ErrorMessage.showStackTrace (e.getStackTrace() )); 	
 				}	
-				JTextArea txtrTralala = new JTextArea();
-				txtrTralala.setText(licenseText.toString());
-				txtrTralala.setEditable(false);
-				panel.setViewportView(txtrTralala);
-				txtrTralala.setCaretPosition(0);
+				JTextArea licenceTextArea = new JTextArea();
+				licenceTextArea.setText(licenseText.toString());
+				licenceTextArea.setEditable(false);
+				panel.setViewportView(licenceTextArea);
+				licenceTextArea.setCaretPosition(0);
 				panel.setBackground(Color.WHITE);
 				{
 					JTextArea textArea = new JTextArea();

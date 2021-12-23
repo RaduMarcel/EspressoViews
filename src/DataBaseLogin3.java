@@ -54,10 +54,12 @@ BUGS
 
 - Nach reload sollte der Focus auf dem Baum sein !
 
+
+
 NEUES
 
+- Logging level in ini file einführen, triggert log4J Funktionen. Zeiten messen, um Prozesse zu optimieren. Derzeit kann man dies nur in der log4J ini-Datei machen 
 
-- Logging level in ini file einführen, triggert log4J Funktionen. Zeiten messen, um Prozesse zu optimieren
 
 - Verbindungen zu neuen Datenbanken erlauben !! 
   Als nächstes: Microsoft SQL Server
@@ -162,6 +164,7 @@ ZUKUNFTSMUSIK
 
 - Warning-Strenge in ini file einführen OK. Der tag <WarningLevel> wurde im inisetting eingeführt. die möglichen Werte sind low und high  
 
+
 - Selectierte Definitionfile ohne connectiondetaily wird rot OK
 
 - number separator richtet sich nach den settings des clients, soll sich nach den settings des users oder der instanz richten OK
@@ -249,11 +252,12 @@ public class DataBaseLogin3 extends JDialog {
 	private final JTextField portTextField;
 	private final JComboBox<String> connTypeComboBox;
 	private final JComboBox<String> dbTypeComboBox;
+	private static String execImmediateExpression;
 	private static Logger logger = LogManager.getLogger(DataBaseLogin3.class.getName());
     protected static byte[] kb = new byte[16];
 
 public static void main(String[] args) {
-	logger.info("*************************************** Espresso Views Database Login Application started ***************************************");
+	logger.debug("*************************************** Espresso Views Database Login Application started ***************************************");
 	new Random().nextBytes(kb);
 	try {
 			File iniFileLocator = new File (iniFile);
@@ -265,7 +269,7 @@ public static void main(String[] args) {
 					ErrorMessage.showException(e,"Problems occured during the creation of the file iniSettings.xml");
 					logger.error("Problems occured during the creation of the file iniSettings.xml\n"+e.getMessage()+"\n"+ErrorMessage.showStackTrace(e.getStackTrace()));
 				}
-				logger.info("The user setting file was not found.\nA new file with default settings will be created: "+iniFileLocator.getAbsolutePath());
+				logger.debug("The user setting file was not found.\nA new file with default settings will be created: "+iniFileLocator.getAbsolutePath());
 			} 
 			
 			LinkedList<Map<String,String>> fileLocators = QueryDefinitionParser.loadFileLocators(iniFile);
@@ -283,7 +287,7 @@ public static void main(String[] args) {
 					} 
 				}	
 			}
-			logger.info(storedFileLocators.size()+" stored file locators found in the user settings file");
+			logger.debug(storedFileLocators.size()+" stored file locators found in the user settings file");
 			LinkedList<Map<String,String>> iniSettings = QueryDefinitionParser.loadIniSettings(iniFile);
 			String lastDirTag="";
 			String warningLevelTag="";
@@ -301,10 +305,10 @@ public static void main(String[] args) {
 				QueryDefinitionParser.storeIniSettings( iniFile, "WARNINGLEVEL","HIGH");//default warning level is High wenn kein warning level angegeben ist
 				warningLevel="HIGH";
 			}
-			logger.info("User warning level set to "+warningLevel);
+			logger.debug("User warning level set to "+warningLevel);
 			//System.out.println(Arrays.toString(UIManager.getInstalledLookAndFeels()));
 			 UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-			 logger.info("Available look-and-feel \n"+Arrays.toString(UIManager.getInstalledLookAndFeels()));
+			 logger.debug("Available look-and-feel \n"+Arrays.toString(UIManager.getInstalledLookAndFeels()));
 			dialog = new DataBaseLogin3();
 			dialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 			dialog.setVisible(true); 
@@ -318,8 +322,9 @@ public static void main(String[] args) {
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public DataBaseLogin3() {
+		execImmediateExpression="";
 		setResizable(false);
-		logger.info("************************************ Starting the DB login window ***************************************");
+		logger.debug("************************************ Starting the DB login window ***************************************");
 		setTitle("Database Log-in");
 		setBounds(100, 100, 569, 427);
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.X_AXIS));
@@ -376,10 +381,10 @@ public static void main(String[] args) {
 		lblQueryDefintion.setHorizontalAlignment(SwingConstants.RIGHT);
 		lblQueryDefintion.setFont(new Font("Tahoma", Font.BOLD, 11));
 		
-		comboBoxStoredConns = new JComboBox<String>();
+		comboBoxStoredConns = new JComboBox<String>();		
 		//Auswahl von gespeicherten DB-Verbindungen. Eine definition file kann mehrere DB-Verbindungen vorlegen. Die gefundenen DB-Verbindungen werden in dieser ComboBox übergeben.    
 		comboBoxStoredConns.addItemListener(new ItemListener() {
-			public void itemStateChanged(ItemEvent arg0) {// Wird aktiviert, wenn der Benutzer eine DB-Verbindung aus der ComboBox-Liste auswählt 
+			public void itemStateChanged(ItemEvent arg0) {// Wird aktiviert, wenn der Benutzer eine DB-Verbindung aus der ComboBox-Liste auswählt
 				//System.out.println("Selected Item  "+(String)(comboBoxStoredConns.getSelectedItem()) );
 				if (connectionDetails!=null) //enthält Verbingsdetails, die aus der ausgewählten definition file geladen wurden 
 				for (int t=0; t<connectionDetails.size();t++ ){
@@ -390,6 +395,7 @@ public static void main(String[] args) {
 					textUserName.setText(connectionDetails.get(t).get("USERNAME"));
 					connTypeComboBox.getModel().setSelectedItem(connectionDetails.get(t).get("CONNECTIONTYPE"));
 					dbTypeComboBox.getModel().setSelectedItem(connectionDetails.get(t).get("DBTYPE"));
+					execImmediateExpression = connectionDetails.get(t).get("EXECAFTERLOGIN");
 					}
 				}
 	
@@ -440,6 +446,7 @@ public static void main(String[] args) {
 									textUserName.setText(connectionDetails.get(t).get("USERNAME"));
 									connTypeComboBox.getModel().setSelectedItem(connectionDetails.get(t).get("CONNECTIONTYPE"));
 									dbTypeComboBox.getModel().setSelectedItem(connectionDetails.get(t).get("DBTYPE"));
+									execImmediateExpression = connectionDetails.get(t).get("EXECAFTERLOGIN");
 								}
 							}
 							//wenn die definition file neu ist, also vom Benutzer eingegeben wurde, kommt sie in die defnition file locators Liste rein, die dann in inisettng.xml gespeichert wird
@@ -478,7 +485,7 @@ public static void main(String[] args) {
 					QueryDefinitionParser.storeIniSettings( iniFile, "LASTDIR",lastDir.getAbsolutePath());
 					selectedFile=c.getSelectedFile().getAbsolutePath();
 					if (!storedFileLocators.contains(c.getSelectedFile().getAbsolutePath()))
-						logger.info("User selected a known definition file locator: "+c.getSelectedFile().getAbsolutePath());
+						logger.debug("User selected a known definition file locator: "+c.getSelectedFile().getAbsolutePath());
 						comboBoxFileDef.addItem(c.getSelectedFile().getAbsolutePath() );//Ausgewählte Datei wird, falls sie noch nicht bekannt ist, in  die fileDef Combobox-Auswahlliste hinzugefügt...
 					comboBoxFileDef.getModel().setSelectedItem(c.getSelectedFile().getAbsolutePath() );//...und wie von Geisterhand selektiert  
 					connectionDetails = QueryDefinitionParser.loadConnectionDetails(selectedFile);//ab hier wird praktisch der code wiederholt der in fileDef ComboBox event-listerer stattfinded  
@@ -678,7 +685,7 @@ public static void main(String[] args) {
 					.addGap(363))
 		);
 		contentPanel.setLayout(gl_contentPanel);
-		logger.info("************************************* Database login window is up and running ***************************************");
+		logger.debug("************************************* Database login window is up and running ***************************************");
 	}	private class SwingAction extends AbstractAction {
 		private static final long serialVersionUID = 1L;
 		public SwingAction() {
@@ -686,7 +693,7 @@ public static void main(String[] args) {
 			putValue(SHORT_DESCRIPTION, "Exit");
 		}
 		public void actionPerformed(ActionEvent e) {
-			logger.info("User ends the application");
+			logger.debug("User ends the application");
 			DBConnections.finish();
 		}
 	}
@@ -720,7 +727,7 @@ public static void main(String[] args) {
 					{		
 						succes=new DataJumper().startDataJumper(
 								dbType,connectionName,host,port,connType,serviceName ,userName, 
-								Encrpt.encrypt(passwordField.getDocument().getText(0,passwordField.getDocument().getLength()),kb),selectedFile, dialog
+								Encrpt.encrypt(passwordField.getDocument().getText(0,passwordField.getDocument().getLength()),kb),selectedFile, dialog,execImmediateExpression
 								);
 					passwordField.getDocument().remove(0,passwordField.getDocument().getLength());
 					}
@@ -733,7 +740,7 @@ public static void main(String[] args) {
 				
 				if(succes)	
 				{//Nachdem die Loginsdetails erfolgreich angewendet wurden, wird ausgelotet ob etwaige Ergänzungen der Logindetails stattgefunden haben
-				logger.info("The view defnition file was sucessfully executed using the connection "+connectionName);
+				logger.debug("The view defnition file was sucessfully executed using the connection "+connectionName);
 				Map<String,String> newConnDet = new HashMap<String,String>();
 				newConnDet.put("DBTYPE",dbType);
 				newConnDet.put("CONNECTIONNAME",connectionName);
@@ -754,7 +761,7 @@ public static void main(String[] args) {
 								((String)(comboBoxStoredConns.getModel().getElementAt(t))).equals(connectionName)
 							   ){//...und somit keine neue Verbindungsdetails wurde, dann Prüfe ob sich vielleicht die login-Details verändert haben
 								newConnectionNameEntered=false;
-								logger.info("The used database connection name "+connectionName+" already exists in the definition file");
+								logger.debug("The used database connection name "+connectionName+" already exists in the definition file");
 							 if ( !(dbType+host+port+connType+serviceName+userName).
 										equals((connectionDetails.get(t).get("DBTYPE")+
 												connectionDetails.get(t).get("HOST")+
@@ -778,15 +785,15 @@ public static void main(String[] args) {
 //									}
 									if(newConnDetailsEntered)// ...dann könnte man sie in der Defnitionsdatei die neuen Logindaten unter denselben ConnectionNamen speichern"
 										{
-										logger.info("The stored connection credentials "+connectionDetails.get(t)+"\nare not matching the last used connection credentials "+newConnDet);
+										logger.debug("The stored connection credentials "+connectionDetails.get(t)+"\nare not matching the last used connection credentials "+newConnDet);
 										//System.out.println("Jetzt könnte man in der Defnitionsdatei die neuen Logindaten unter denselben ConnectionNamen speichern\n"+(host+serviceName+userName)+" != "+ connectionDetails.get(t).get("HOST")+connectionDetails.get(t).get("SERVICENAME")+connectionDetails.get(t).get("USERNAME")  );
 										QueryDefinitionParser.amendConnectionDetailsXML(selectedFile,newConnDet,"");
-										logger.info("The stored connection credentials were sucessfully updated");
+										logger.debug("The stored connection credentials were sucessfully updated");
 										connectionDetails = QueryDefinitionParser.loadConnectionDetails(selectedFile);
 										}
 								}	
 								else 
-									logger.info("The last used connection credentials:\n"+newConnDet+"\nare are allready stored in the database connection named "+connectionName);
+									logger.debug("The last used connection credentials:\n"+newConnDet+"\nare are allready stored in the database connection named "+connectionName);
 									//System.out.println("Name und connectionDetails sind gleich geblieben, nichts passiert");
 								break;
 								}
@@ -798,7 +805,7 @@ public static void main(String[] args) {
 								connectionName=newConnDet.get("CONNECTIONNAME");
 							}
 							
-							logger.info("New database connection name found:"+ connectionName );
+							logger.debug("New database connection name found:"+ connectionName );
 							boolean newConnDetailsEntered=true; 
 							for (Map<String,String> conns : connectionDetails){//Prüfe nun die, ob connectionDetails mit dem neuen Namen mit den Details irgendeiner stored connection übereinstimmen "
 								if ((dbType+host+port+connType+serviceName+userName).
@@ -813,8 +820,8 @@ public static void main(String[] args) {
 								{
 									newConnDetailsEntered=false;
 									//System.out.println("Überscheibe den Namen der Connection "+conns.get("CONNECTIONNAME")+" mit "+comboBoxStoredConns.getModel().getSelectedItem() );
-									logger.info("The connection credentials are already stored in the definition file with the connection name "+ conns.get("CONNECTIONNAME"));
-									logger.info("The connection name "+ conns.get("CONNECTIONNAME")+" will be renamed to "+connectionName);
+									logger.debug("The connection credentials are already stored in the definition file with the connection name "+ conns.get("CONNECTIONNAME"));
+									logger.debug("The connection name "+ conns.get("CONNECTIONNAME")+" will be renamed to "+connectionName);
 									QueryDefinitionParser.amendConnectionDetailsXML(selectedFile, newConnDet,conns.get("CONNECTIONNAME") );//Änderung speichern
 									connectionDetails = QueryDefinitionParser.loadConnectionDetails(selectedFile);//...und anwenden
 									comboBoxStoredConns.removeItem(conns.get("CONNECTIONNAME"));//Der alte Name wird entfernt
@@ -831,8 +838,8 @@ public static void main(String[] args) {
 									connectionName=newConnDet.get("CONNECTIONNAME");
 								}
 									//System.out.println("Erzeuge eine neue Connection mit Namen "+comboBoxStoredConns.getModel().getSelectedItem()+" und den Verbindungs details "+host+" "+serviceName+" "+userName);
-									logger.info("The sucessfully used database connection credentials must be new since they were not found in the definition file");
-									logger.info("The following connection credentials are added in the definition file:\n"+newConnDet);
+									logger.debug("The sucessfully used database connection credentials must be new since they were not found in the definition file");
+									logger.debug("The following connection credentials are added in the definition file:\n"+newConnDet);
 									QueryDefinitionParser.addConnectionDetailsToDefFile( selectedFile, newConnDet );
 									connectionDetails = QueryDefinitionParser.loadConnectionDetails(selectedFile);
 									comboBoxStoredConns.addItem(connectionName);	

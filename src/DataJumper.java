@@ -11,6 +11,8 @@ import java.awt.event.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.MatteBorder;
 import javax.swing.border.SoftBevelBorder;
+import javax.swing.event.TreeExpansionEvent;
+import javax.swing.event.TreeExpansionListener;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -20,7 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.awt.*;
 import java.io.File;
-import java.awt.datatransfer.Clipboard;
+//import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.Toolkit;
 
@@ -37,7 +39,7 @@ protected JTree theGUITree;
 
 public boolean startDataJumper (// Erzeugt und zeigt den EspressoView
 		final String dbType, final String connectionName, final String host,final String port,final String connType,final String serviceName, final String userName, 
-		final String password, final String file, final JDialog dialog) {
+		final String password, final String file, final JDialog dialog,final String execImmediateExpression) {
 
 final String defFileNameOnly=new File(file).getName();	
 //das Hauptfenster
@@ -67,7 +69,7 @@ final String defFileNameOnly=new File(file).getName();
 	final JTabbedPane tabbedPaneBottom = new JTabbedPane();
 	splitPane.setRightComponent(tabbedPaneBottom);
 	final JScrollPane scrollPaneBottom =  new JScrollPane();
-	tabbedPaneBottom.add("Warnings",scrollPaneBottom);
+	tabbedPaneBottom.add("Information",scrollPaneBottom);
 	final JTextArea txtwarningMessage = new JTextArea();
 	scrollPaneBottom.setViewportView(txtwarningMessage);
 	txtwarningMessage.setFont(new Font("Monospaced", Font.BOLD, 13));
@@ -96,7 +98,7 @@ final String defFileNameOnly=new File(file).getName();
 			loadFileMenuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					dialog.setVisible(true);
-					logger.info("User set the database login window to visible");	
+					logger.debug("User set the database login window to visible");	
 				}
 			});
 			dateiMenu.add(loadFileMenuItem);
@@ -105,7 +107,7 @@ final String defFileNameOnly=new File(file).getName();
 			exitMenuItem.setFont(menuItemFont);
 			exitMenuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
-					logger.info("User closed the window "+defFileNameOnly+": "+connectionName );
+					logger.debug("User closed the window "+defFileNameOnly+": "+connectionName );
 					frame.dispose();
 					dialog.setVisible(true);
 				}
@@ -125,10 +127,10 @@ final String defFileNameOnly=new File(file).getName();
 				public void actionPerformed(ActionEvent arg0) {
 					removeAllTreeComponents(frame,1);
 					viewOption="detailed";
-					logger.info("View is generated with view option 'detailed'");
+					logger.debug("View is generated with view option 'detailed'");
 //					Thread queryThread = new Thread() {
 //						public void run(){
-							splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,false));
+							splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,false,execImmediateExpression));
 //						}
 //					};
 //					queryThread.start();
@@ -143,10 +145,10 @@ final String defFileNameOnly=new File(file).getName();
 				public void actionPerformed(ActionEvent arg0) {
 					removeAllTreeComponents(frame,1);
 					viewOption="compact";
-					logger.info("View is generated with view option 'compact'");
+					logger.debug("View is generated with view option 'compact'");
 //					Thread queryThread = new Thread() {
 //						public void run(){
-							splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,false));
+							splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,false,execImmediateExpression));
 //						}
 //					};
 //					queryThread.start();
@@ -158,11 +160,11 @@ final String defFileNameOnly=new File(file).getName();
 			structureMenuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent arg0) {
 					removeAllTreeComponents(frame,1);
-					logger.info("View is generated with view option 'structure'");
+					logger.debug("View is generated with view option 'structure'");
 					viewOption="structure";
 //					Thread queryThread = new Thread() {
 //						public void run(){
-							splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,false));
+							splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,false,execImmediateExpression));
 //						}
 //					};
 //					queryThread.start();
@@ -178,9 +180,6 @@ final String defFileNameOnly=new File(file).getName();
 			helpMenu.setFont(menuFont);
 			menuBar.add(helpMenu);
 			
-			JMenuItem tutorialMenuItem = new JMenuItem("Tutorial");
-			tutorialMenuItem.setBackground(menuColor);
-			tutorialMenuItem.setFont(menuItemFont);
 			JMenuItem aboutMenuItem = new JMenuItem("About");
 			aboutMenuItem.setBackground(menuColor);
 			aboutMenuItem.setFont(menuItemFont);
@@ -191,13 +190,12 @@ final String defFileNameOnly=new File(file).getName();
 						dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 						dialog.setVisible(true);
 					} catch (Exception e) {
-						logger.error(e);
+						logger.error(e.getMessage()+"\n"+ErrorMessage.showStackTrace(e.getStackTrace()));
 						ErrorMessage.showException(e,"");
 					}
 					return;
 				}
 			});
-			helpMenu.add(tutorialMenuItem);
 			helpMenu.add(aboutMenuItem);
 // Collapse Tree Button			
 			final JButton btnCollapse= new JButton("Collapse Tree");						
@@ -220,8 +218,8 @@ final String defFileNameOnly=new File(file).getName();
 					removeAllTreeComponents(frame,1);
 					allePlaene=null;
 					//btnReload.setVisible(false);
-					logger.info("View defintion file is reloaded upon user request");
-					splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host,port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,true));
+					logger.debug("View defintion file is reloaded upon user request");
+					splitPane.setLeftComponent(generateTheTree (dbType,connectionName,host,port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,true,execImmediateExpression));
 					theGUITree.setSelectionRow(1);
 					btnReload.setVisible(true);
 				}
@@ -239,7 +237,7 @@ final String defFileNameOnly=new File(file).getName();
 			frame.setVisible(true);
 	Thread queryThread = new Thread() {
 		public void run(){
-			final JScrollPane scrollPane = generateTheTree(dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,true);
+			final JScrollPane scrollPane = generateTheTree(dbType,connectionName,host, port, connType,serviceName, userName, password, file, txtProgressMessage,txtwarningMessage,frame,dialog,tabbedPaneBottom,true,execImmediateExpression);
 //				if (scrollPane==null) {
 //					frame.dispose();
 //					return false;	
@@ -254,7 +252,7 @@ queryThread.start();	//generateTheTree wird jetzt als paraleller thread gestarte
 
 private JScrollPane generateTheTree(final String dbType, final String connectionName, final String host,final String port, final String connType,
 		final String serviceName, final String userName, final String password,
-		final String file, final JTextArea txtProgressgMessage, JTextArea txtwarningMessage, final JFrame frame, final JDialog dialog, final JTabbedPane tabbedPaneBottom, boolean refreshFlag) 
+		final String file, final JTextArea txtProgressgMessage, JTextArea txtwarningMessage, final JFrame frame, final JDialog dialog, final JTabbedPane tabbedPaneBottom, boolean refreshFlag, final String execImmediateExpression) 
 {
 //JTree tree = null;
 	//this.allePlaene=null;
@@ -266,7 +264,7 @@ private JScrollPane generateTheTree(final String dbType, final String connection
 txtProgressgMessage.setText("Processing the report definition file "+file+" on datatabase connection "+ connectionName+"...\n\n");
 long startTime =  new Date().getTime();  
 if (refreshFlag){
-conn = DBConnections.getNewConnection(dbType,serviceName, host, port, connType,userName, password);
+conn = DBConnections.getNewConnection(dbType,serviceName, host, port, connType,userName, password,execImmediateExpression);
 if (conn==null) {
 	frame.dispose();
 	dialog.setVisible(true);
@@ -279,7 +277,7 @@ txtProgressgMessage.append("Successfully connected to the datatabase.\n");
 			txtProgressgMessage.append("\n\nReport definition file validation ended with error!");
 			return new JScrollPane(txtProgressgMessage); 	
 		}
-		//******************************+überprüft die uniquness der query labels innerhlad der gesamten report definition
+		//******************************überprüft die uniquness der query labels innerhlad der gesamten report definition
 		LinkedList<String> allQueryLabels = new LinkedList<String>();
 		HashSet<String> hashQueryLabels = new HashSet<String>();
 		for (AnfragePlan basePlan:allePlaene) {//Die Uniqueness der Querylabels und auch, welche Labels mehrfach vergeben sind, wird geprüft   
@@ -303,9 +301,18 @@ txtProgressgMessage.append("Successfully connected to the datatabase.\n");
 			return new JScrollPane(txtProgressgMessage); 	
 			}
 		
+		if (viewOption.equals("compact"))
+			for (AnfragePlan ap : allePlaene){
+				if (ap.isExecuteOnFirstRun()==false)
+					ErrorMessage.showException("Currently the view option Compact is not supported in conjunction with the option ExecuteOnFirstRun set to false\n");
+					txtProgressgMessage.append("Currently the view option Compact is not supported in conjunction with the option ExecuteOnFirstRun set to false\n");
+					logger.error("Currently the view option Compact is not supported in conjunction with the option ExecuteOnFirstRun set to false\n");
+					return new JScrollPane(txtProgressgMessage); 	
+			}
+		
 	} catch (Exception e) {
 		ErrorMessage.showException(e,"The reading and processing of the definition file terminated with error");
-		logger.error("The reading and processing of the definition file terminated with error\n"+e);
+		logger.error("The reading and processing of the definition file terminated with error\n"+e.getMessage()+"\n"+ErrorMessage.showStackTrace(e.getStackTrace()));
 		warnings.delete(0, warnings.length());
 		txtProgressgMessage.append("\n\nReport definition file validation ended with error!");
 		return new JScrollPane(txtProgressgMessage); 			
@@ -327,48 +334,81 @@ txtProgressgMessage.append("Begin to query the datatabase\n");
 	}catch (Exception e) {
 		warnings.delete(0, warnings.length());		
 		ErrorMessage.showException(e,"An unexpected error occured during the initial stage of the data retrieval");
-		logger.error("An unexpected error occured during the initial stage of the data retrieval\n"+e);
+		logger.error("An unexpected error occured during the initial stage of the data retrieval\n"+e.getMessage()+"\n"+ErrorMessage.showStackTrace(e.getStackTrace()));
 		txtProgressgMessage.append("\n\nData retrieval preparation ended with error!");
 		return new JScrollPane(txtProgressgMessage); 	
 	}
 	try{		
 		dataSuccess=true;
-		dataSuccess= allePlaene.get(0).generateData(conn,txtProgressgMessage);// von der wurzel aus wird der datenbaum generiert
+		dataSuccess= allePlaene.get(0).generateData(conn,txtProgressgMessage,true);// von der wurzel aus wird der datenbaum generiert
 		if (!dataSuccess) {
 			warnings.delete(0, warnings.length());
 			txtProgressgMessage.append("\n\nData retrieval ended with error!");
 			return new JScrollPane(txtProgressgMessage); 	
 			}
-		logger.info("Data retrieval ended successfully");
+		logger.debug("Data retrieval ended successfully");
 		//DisplayData.generateBlockDisplay(allePlaene.get(0));
 	}catch (Exception e) {
 		warnings.delete(0, warnings.length());
 		ErrorMessage.showException(e,"An unexpected error occured while retrieving and caching the data");
-		logger.error("An unexpected error occured while retrieving and caching the data\n"+e);
+		logger.error("An unexpected error occured while retrieving and caching the data\n"+e.getMessage()+"\n"+ErrorMessage.showStackTrace(e.getStackTrace()));
 		txtProgressgMessage.append("\n\nData retrieval ended with error!");
 		return new JScrollPane(txtProgressgMessage); 	
 	}
 }
+	
 long dataRetrivalFinished =  new Date().getTime();	
 txtProgressgMessage.append("Database retrieval ended without errors in "+((float)(dataRetrivalFinished - defintionFileParsed)/1000)+" seconds\n");
-logger.info("Data display phase starts producing the view option "+viewOption);
+logger.debug("Data display phase starts producing the view option "+viewOption);
 txtProgressgMessage.append("Start to generate the report display.\n");
 //An diesem Punkt existiert eine Anfrage-hierarchie mit angehängten Datenblöcken. Ab jetzt werden die einzelnen Datenzeilen zu einem Jtree Datenbaum verschachtelt.  
 	try{		
-		if (viewOption.equals("detailed")||viewOption.equals("compact")){
-			wurzel = DisplayData.generateJointDisplay(allePlaene.get(0),"Definition File "+new File(file).getName()+ " applied on "+connectionName+". Captured on "+Calendar.getInstance().getTime().toString(),viewOption);
-			logger.info("Raw display data generated for Definition File "+new File(file).getName()+ " applied on "+connectionName+". Captured on "+Calendar.getInstance().getTime().toString());
+		if (viewOption.equals("detailed")){
+			boolean hasData = true;
+			for (AnfragePlan ap : allePlaene){
+				if (ap.hasData()==false){
+					ErrorMessage.showException("Report Data was lost from memory. Please reload the report to regenerate the data\n");
+					txtProgressgMessage.append("Report Data was lost from memory. Please reload the report to regenerate the data\n");
+					logger.error("Report Data was lost from memory. Please reload the report to regenerate the data\n");
+					hasData = false;
+					break;
+				}
+			}
+			if (hasData)
+				wurzel = DisplayData.generateJointDisplay(allePlaene.get(0),"Definition File "+new File(file).getName()+ " applied on "+connectionName+". Captured on "+Calendar.getInstance().getTime().toString(),viewOption,true);
+			else return new JScrollPane(txtProgressgMessage); 
+				
+		}
+		logger.debug("Raw display data generated for Definition File "+new File(file).getName()+ " applied on "+connectionName+". Captured on "+Calendar.getInstance().getTime().toString());
+		
+		if (viewOption.equals("compact")){
+			boolean isSupported = true;
+			for (AnfragePlan ap : allePlaene){
+				if (ap.isExecuteOnFirstRun()==false)
+					ErrorMessage.showException("Currently the view option Compact is not supported in conjunction with ExecuteOnFirstRun option set to false\n");
+					txtProgressgMessage.append("Currently the view option Compact is not supported in conjunction with ExecuteOnFirstRun option set to false\n");
+					logger.error("Currently the view option Compact is not supported in conjunction with ExecuteOnFirstRun option set to false\n");
+					isSupported = false;
+					break;
+			}
+			if (isSupported){
+			wurzel = DisplayData.generateJointDisplay(allePlaene.get(0),"Definition File "+new File(file).getName()+ " applied on "+connectionName+". Captured on "+Calendar.getInstance().getTime().toString(),viewOption,true);
+			logger.debug("Raw display data generated for Definition File "+new File(file).getName()+ " applied on "+connectionName+". Captured on "+Calendar.getInstance().getTime().toString());
+			}
+			else return new JScrollPane(txtProgressgMessage); 	
 		}
 		if (viewOption.equals("structure")){
 			wurzel = DisplayData.generateStructDisplay(allePlaene.get(0),"Overview of the definition file "+file,viewOption);
-			logger.info("Generated raw data for the overview of the definition file "+file,viewOption);
+			logger.debug("Generated raw data for the overview of the definition file "+file,viewOption);
 		}
-long dataTreeGenerated =  new Date().getTime();		
+		long dataTreeGenerated =  new Date().getTime();		
 		int[] totalChildren = DataNode.getTreeNodeCount(wurzel.getNextNode());
 		txtProgressgMessage.append("Data tree generated in "+(float)(dataTreeGenerated-dataRetrivalFinished)/1000  +" seconds\n");
-		logger.info("The generation of the graphical user interface started");
+//---------------------------AB HIER ENTSTEHT DER GRAPHISCHE BAUM-------------------------- 		
+		logger.debug("The generation of the graphical user interface started");
 		model = new DefaultTreeModel(wurzel);
 		final JTree tree = new JTree(model);
+		
 		 tree.addKeyListener(new KeyAdapter(){
 			@Override 
 	        public void keyReleased(KeyEvent event) { 
@@ -385,6 +425,105 @@ long dataTreeGenerated =  new Date().getTime();
 		renderer = new ResultLineRenderer();
 		//  renderer.setClosedIcon(null);
 		tree.setCellRenderer(renderer);
+		
+		tree.addTreeExpansionListener(new TreeExpansionListener() {
+			public void treeCollapsed(TreeExpansionEvent arg0) {}
+			public void treeExpanded(TreeExpansionEvent arg0) {
+				DefaultTreeModel model = (DefaultTreeModel) tree.getModel();//Ziel ist hier zu prüfen, ob für den ausgefahrenen Baumzweig die query schon laufen gelassen hat und die Daten erzeugt wurden. 
+				DefaultMutableTreeNode selectedTreeNode = ((DefaultMutableTreeNode) (arg0.getPath().getLastPathComponent()));
+				DataNode firstChildNode=null, labelNode=null, lastDataNode;
+//				System.out.println(" Selected Element:"+  (String)(((DefaultMutableTreeNode) (arg0.getPath().getLastPathComponent())).getUserObject())  );
+				//System.out.println( model.getIndexOfChild(root,tree.getSelectionPath().getLastPathComponent())+" number ");				
+				if (  ((DefaultMutableTreeNode) (selectedTreeNode.getFirstChild())).getUserObject() instanceof DataNode ){//kein check auf null denn, wenn sich ein Element ausfahren lässt, dann muss es Kinder haben 
+					 firstChildNode = ((DataNode) (((DefaultMutableTreeNode) (selectedTreeNode.getFirstChild())).getUserObject()) );
+					 if (firstChildNode.isQueryOnDemand() ){//wenn ja, dann muss die Query dynamisch ermittelt und ausgeführt werden 
+						String selectedLabel = ((String) selectedTreeNode.getUserObject());
+						labelNode = firstChildNode.getParent();
+						lastDataNode = labelNode.getParent();
+						AnfragePlan selectedPlan = null;
+							for (AnfragePlan a : allePlaene){ //die Basisquery liegt im selected plan
+								if (a.getQueryName().equals(selectedLabel) ){//query label is gleich dem label des ausgewählten nodes
+									selectedPlan = a;
+									break;
+								}
+							}
+						if (selectedPlan != null){
+							logger.debug("Sub-Baum AnfragePlan vor dynmischer Query\n"+selectedPlan.showAnfragePlan(true) );
+							selectedPlan.setDynamicSqlQuery(DisplayData.generateSqlQueryFromTreeElement(selectedTreeNode, allePlaene)); //jetzt muss die query mit den anwedenbaren Kriterien aus den oberen Ergebnissen ergänzt werden
+							//benutze getApplicableConditionFromNodeParents, um die transmittedConditionsColumns des selectedPlan den Node Parametern einzugrenzen   
+							//(DataNode)(((DefaultMutableTreeNode) currNode.getParent()).getUserObject())
+							selectedPlan.transmittedConditions = DisplayData.getApplicableConditionFromNodeParents(lastDataNode,selectedPlan.transmittedConditions, true);
+							for (TransmittedCondition tc: selectedPlan.transmittedConditions){
+								if (tc.getValue().equals("'null'") || tc.getValue().equals("null"))
+									tc.setValue(" is null ");
+								else
+									tc.setValue(" in ('"+tc.getValue()+"')");
+																
+							}
+							//logger.info("neu berechnete transmittedConditions" + selectedPlan.transmittedConditions );
+							
+								try{
+									boolean success= AnfragePlan.generateAllTempTables(conn,selectedPlan);
+									if (!success) {
+										warnings.delete(0, warnings.length());
+										DBConnections.dropAllTempTables();
+										}
+								}catch (Exception e) {
+									warnings.delete(0, warnings.length());		
+									ErrorMessage.showException(e,"An unexpected error occured during the initial stage of the data retrieval");
+									logger.error("An unexpected error occured during the initial stage of the data retrieval\n"+e);
+									DBConnections.dropAllTempTables();
+								}
+								try{		
+									dataSuccess=true;
+									dataSuccess= selectedPlan.generateData(conn,txtProgressgMessage,false);// vom ausgewählten Plan aus wird der Datensatz generiert
+									logger.debug("Sub-Baum AnfragePlan nach dynmischer Query\n"+selectedPlan.showAnfragePlan(true) );
+									if (!dataSuccess) {
+										warnings.delete(0, warnings.length());
+										}
+									logger.debug("Data retrieval ended successfully");
+								}catch (Exception e) {
+									warnings.delete(0, warnings.length());
+									ErrorMessage.showException(e,"An unexpected error occured while retrieving and caching the data");
+									logger.error("An unexpected error occured while retrieving and caching the data\n"+e);
+								}
+						DefaultMutableTreeNode addOn = DisplayData.generateJointDisplay(selectedPlan,"the dynamic add",viewOption,false);	
+//						 newNode=new DataNode("Dynamic Column@°@", "Dynamic Content@°@",  firstChildNode.getParent());
+//						 newNode.setViewOption(firstChildNode.getParent().getViewOption());
+//						 newNode.determineMaxColumnLength(newNode);
+						if (addOn!=null){ 
+							logger.debug("Generierter Datenbaum\n"+DisplayData.showTreeStructureDebug(addOn, true) );
+							model.removeNodeFromParent((MutableTreeNode) selectedTreeNode.getFirstChild());//der dummy record wird aus dem JavaTree verschwinden. Bei einer Query, die mit create on demand gestartet wird, gibt es schon den Label, das heißt, der jetzt erzeugte query label wird nicht mehr gebraucht, sondern nur noch seine Kinder  
+							labelNode.setChildren(new LinkedList<DataNode>());//der dummy record mit null values muss auch aus dem DataNode Baum entfernt werden
+							//Parallel zu dem DefaultMutableTreeNode Baum gibt es auch einen DataNode-Baum, der auch mit den neuen Zweigen ergänzt werden will
+							for (int childNr=0; childNr<addOn.getChildCount();childNr++){
+								DataNode addOnChild = ((DataNode) ((DefaultMutableTreeNode) addOn.getChildAt(childNr)).getUserObject());
+								labelNode.insertOnLevel(addOnChild);
+								addOnChild.setParent(labelNode);
+							}
+							labelNode.getFirstChild().setQueryOnDemand(false);
+							for (int childNr=0; labelNode.getChildren().size()>childNr; childNr++){
+								DefaultMutableTreeNode newLine = getTreeNodeForDataNode(addOn,labelNode.getChildren().get(childNr));  
+										//(DefaultMutableTreeNode) addOn.getFirstChild();
+								//addOn.remove(0);
+								model.insertNodeInto(newLine//irgendwie wird beim Einfügen in das Model das eingefügte Element aus dem addOn Container gelöscht
+					 					  , selectedTreeNode
+					 					  , childNr	
+					 					  );
+//							 	model.reload(selectedTreeNode);
+
+//								 System.out.println("Node Inserted");
+							}
+//					     model.removeNodeFromParent((MutableTreeNode) selectedNode.getChildAt(0));
+						}
+						else 
+							model.removeNodeFromParent((MutableTreeNode) selectedTreeNode.getFirstChild());
+						tree.expandRow(tree.getRowForPath(arg0.getPath()));
+					 	}
+					 }
+				}
+			}
+		});
 
         tree.addMouseListener(new MouseAdapter() {
 			@Override
@@ -503,14 +642,15 @@ long GUIGenerated =  new Date().getTime();
 		
 		//Baum wird im Frame eingepflanzt
 
-		logger.info("The generation of the graphical user interface ended");
+		logger.debug("The generation of the graphical user interface ended");
 		return scrollPane; 
 
 	}catch(Exception ex){
 		DBConnections.dropAllTempTables();
-		ErrorMessage.showException(ex,"Error encountered during the generation of the graphical user interface ended");
+		ErrorMessage.showException(ex,"Error encountered during the generation of the graphical user interface");
 		logger.error("Error encountered during the generation of the graphical user interface ended\n"+ex);
 		frame.dispose();
+		dialog.setVisible(true);
 		return null;
 	}
 }
@@ -577,6 +717,21 @@ static boolean containsCaseInsensitive (Collection<String> haufen, String teil )
 		}
 	}
 	return result;
+	
+}
+
+static DefaultMutableTreeNode getTreeNodeForDataNode(DefaultMutableTreeNode parentTreeNode, DataNode dataNode){
+	DefaultMutableTreeNode returnTreeNode = null;
+	
+	if (parentTreeNode ==null ||parentTreeNode.getFirstChild()==null)
+		return returnTreeNode;
+	for (int t=0; t<parentTreeNode.getChildCount();t++){
+		if (dataNode == ((DefaultMutableTreeNode) parentTreeNode.getChildAt(t)).getUserObject() )   
+			return (DefaultMutableTreeNode) parentTreeNode.getChildAt(t);
+	}
+	return returnTreeNode;
+	
+	
 }
 
 
@@ -687,70 +842,11 @@ class RightClickOptionMenu extends JPopupMenu{
 			  DefaultMutableTreeNode currNode= (DefaultMutableTreeNode)(selPath.getLastPathComponent()); 
               DataNode selectedDataNodeLabel=null;
 			  String selection = null;
+			  String separator=null;
             
-			if (e.getActionCommand().contains("copySQL")){
-				String dataNodeLabel="";
-				boolean labelSelection=false;
-				DataNode criteriaNode = null;
-				List<TransmittedCondition>transmConditions=null;
-				String originalSql="";
-				String finalSql="";
-				StringBuilder whereClause=new StringBuilder();
-				String operator="=";
-				String varcharDelimiter="'";
-				if (currNode.getUserObject() instanceof DataNode){
-					criteriaNode=(DataNode)(currNode.getUserObject());
-				}
-				
-				if (currNode.getUserObject() instanceof String){
-					dataNodeLabel=(String)(currNode.getUserObject());
-					labelSelection=true;
-					if ( ((DefaultMutableTreeNode) currNode.getParent()).getUserObject() instanceof DataNode )
-						criteriaNode=(DataNode)(((DefaultMutableTreeNode) currNode.getParent()).getUserObject());
-				}
-				
-				if (labelSelection==false){
-					dataNodeLabel=criteriaNode.getParent().getValues();
-				}	
-				for (AnfragePlan a : allePlaene){
-					if (a.getQueryName().equals(dataNodeLabel) ){//query label is gleich dem label des ausgewählten nodes
-						originalSql=a.getSqlQuery();
-						transmConditions=a.transmittedConditions;
-						break;
-					}
-				}
-				if (labelSelection==false){//Node Selection
-					for (int t=0;t<criteriaNode.getColumnArray().length && t<15;t++){
-						if (criteriaNode.getValueArray()[t].equals("null")){
-							operator="is";
-							varcharDelimiter="";
-							}
-						else{
-							operator="=";
-							varcharDelimiter="'";
-							}
-						whereClause.append("\n\tAND "+criteriaNode.getColumnArray()[t]+" "+operator+" "+varcharDelimiter+criteriaNode.getValueArray()[t]+varcharDelimiter);
-					}
-				}
-				else{//Label Selection
-					if (criteriaNode!=null&& criteriaNode.getColumnArray().length>0)  
-					for (TransmittedCondition transmCondition:transmConditions){
-						if (transmCondition.inheritanceIsNotApplicable()==false){
-							for (int t=0;t<criteriaNode.getColumnArray().length;t++){
-								if(transmCondition.getIdentifier().equals(criteriaNode.getColumnArray()[t].toUpperCase()))
-									whereClause.append("\n\tAND "+criteriaNode.getColumnArray()[t]+" "+operator+" "+varcharDelimiter+criteriaNode.getValueArray()[t]+varcharDelimiter);
-							}
-						}
-					}
-				}
-				finalSql="select * from ("+originalSql+")a\nWhere " + whereClause.toString().replaceFirst("AND ", "")+";";
-//				System.out.println(a.getSqlQuery()+"\n"+a.getTransmittedConditionAttributes()+"\n"+finalSql	);
-				if (whereClause.length()>0)
-					selection=finalSql;
-				else
-					selection = originalSql+";";
-			}	  
-            String separator=null;
+			if (e.getActionCommand().contains("copySQL"))
+				selection = DisplayData.generateSqlQueryFromTreeElement(currNode, allePlaene)+";";	
+            
             boolean addSub=false;
             if (e.getActionCommand().endsWith("Tab"))
             	separator="\t";
@@ -783,6 +879,8 @@ class RightClickOptionMenu extends JPopupMenu{
 			  }
 //		    System.out.println("Selected: " + e.getActionCommand()+"\nAngelicktes Baumelement: "+selectedDataNodeLabel);    
 		  }
+
+
 		}
 } 
 
@@ -812,16 +910,17 @@ class ResultLineRenderer extends DefaultTreeCellRenderer implements TreeCellRend
 		  Component returnValue = null;
 	      //System.out.println(tree.getSelectionPath()+" Row "+tree.getRowForPath(tree.getSelectionPath())  );
 	    if ((value != null) && (value instanceof DefaultMutableTreeNode)) {
+	    	DefaultMutableTreeNode currTreeNode =  (DefaultMutableTreeNode) value;	
 	      Object treeObject = ((DefaultMutableTreeNode) value).getUserObject();
 	      if (treeObject instanceof DataNode && !((DataNode) treeObject).isLabel && ((DataNode) treeObject).columns!=null) {//ist ein Ergebniszeile mit mindestens eine column
 	    	renderer.add(table);
 	    	DataNode line = (DataNode) treeObject;
 	        //System.out.println("Parent--> "+line + "\nund die "+line.childNumber+" Kinderchen:\n "+line.getChildren());
 	        DefaultTableModel tableModel;
-	        if ( line.getChildNumber()!=0  && !line.getViewOption().equals("structure") )//Ist die Ergebniszeile nicht das 1. Kind. (viewOption müsste Teil der DataNode line-Information sein, um extra Behandlungen zu implementieren) 
+	        if ( line!=null && line.getChildNumber()!=0  &&  !line.getViewOption().equals("structure") )//Ist die Ergebniszeile nicht das 1. Kind. (viewOption müsste Teil der DataNode line-Information sein, um extra Behandlungen zu implementieren) 
 	        	tableModel = new DefaultTableModel(new Object[][] {line.getValueArray(true)},line.getColumnArray(true));//...dann werden nur die Werte angezeigt, nicht auch die column names 	
 	        else	
-	        	{tableModel= new DefaultTableModel(new Object[][] {line.getColumnArray(true),line.getValueArray(true),},line.getColumnArray(true));//... ansonsten werden Werte und column names angezeigt 
+	        	{tableModel= new DefaultTableModel(new Object[][] {line.getColumnArray(true),line.getValueArray(true)},line.getColumnArray(true));//... ansonsten werden Werte und column names angezeigt 
 	        	}
 	        table.setModel(tableModel);
 	        table.setSize(new Dimension(2+ColumnsAutoSizer.getMaxTableRowWith(table),table.getRowHeight(0)*table.getRowCount() ));
@@ -865,21 +964,29 @@ class ResultLineRenderer extends DefaultTreeCellRenderer implements TreeCellRend
 	        renderer.setEnabled(tree.isEnabled());
 	        returnValue = renderer;
 	        //System.out.println("  hasFocus:"+ hasFocus+ "  is selected:"+selected+"  is expanded:"+expanded+"  is leaf:"+ leaf+"  row:"+row+ "  lastRowNumber:"+lastRowNumber);
-	        if (lastRowNumber==row && expanded && hasFocus &&lastIsExpanded==false && line.getChildren().size()==1){//wenn ein Baumknoten ausgefahren wird und er hat nur ein Kindknoten, dann soll auch das Kindknoten ausgefahren werden 	
+	      //wenn ein Baumknoten ausgefahren wird und er hat nur ein Kindknoten, dann soll auch das Kindknoten ausgefahren werden
+	        if (lastRowNumber==row && expanded && hasFocus &&lastIsExpanded==false && line.getChildren().size()==1 &&line.getFirstChild().isQueryOnDemand()==true ){ 	
 	        //System.out.println(" Jetzt!!\n");
 	        	tree.expandRow(row+1);
 	        }
 	      }
 	      else
-	      if (treeObject instanceof String && ((String) treeObject)!=null) {//Das ist der renderer für Label
+	    	//Das ist der renderer für Label	  
+	      if (treeObject instanceof String && ((String) treeObject)!=null) {
 	    	String line = (String) treeObject;
 	        label = new JLabel(line);
+	        DataNode firstLabelChild = null;
+	        if (!currTreeNode.isRoot() && currTreeNode.getChildCount()>0)
+	        	firstLabelChild = (DataNode)((DefaultMutableTreeNode)currTreeNode.getFirstChild()).getUserObject(); 
 	        //System.out.println(tree.isExpanded(row)+" row:"+row);
     		if (selected) label.setForeground((Color) Color.RED );
     		else 
     			if (tree.isExpanded(row) && row!=0) label.setForeground(new Color(178, 34, 34));
     			else label.setForeground(Color.black);
-	        label.setFont(new Font("Tahoma", Font.BOLD, 13));
+    		if ( firstLabelChild != null  && firstLabelChild.isQueryOnDemand()   )// the first child is "the dynamic add"
+    			label.setFont(new Font("Tahoma", Font.BOLD |Font.ITALIC, 13));
+    		else	
+    			label.setFont(new Font("Tahoma", Font.BOLD, 13));
 	        label.setBorder(new MatteBorder(0, 1, 0, 0,  new Color(0, 0, 0)));
 	        returnValue = label;
 	      }

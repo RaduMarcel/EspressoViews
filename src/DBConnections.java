@@ -7,11 +7,13 @@ import java.sql.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.sql.CallableStatement;
+
 
 public class DBConnections {
 	private static Logger logger = LogManager.getLogger(DBConnections.class.getName());	
-	static Connection getNewConnection(String dbType,String serviceName, String host, String port, String connType, String userName, String password)  {
-		
+	static Connection getNewConnection(String dbType,String serviceName, String host, String port, String connType, String userName, String password,String execImmediateExpression)  {
+		System.out.println("execImmediateExpression "+execImmediateExpression);
 		if (dbType.equals("Oracle")){
 			// DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
 			try {
@@ -45,7 +47,31 @@ public class DBConnections {
 					st2.executeQuery(alterSessionQuery);
 				}
 				st.close();	rs.close(); st2.close();
-				logger.info("Connected sucessfully to "+ DataJumper.conn.getMetaData().getDatabaseProductName()+" server, version "+ DataJumper.conn.getMetaData().getDatabaseProductVersion());
+				logger.debug("Connected sucessfully to "+ DataJumper.conn.getMetaData().getDatabaseProductName()+" server, version "+ DataJumper.conn.getMetaData().getDatabaseProductVersion());
+				
+				if (execImmediateExpression !=null && execImmediateExpression.length()>0 && dbType.equals("Oracle")){
+					logger.debug("Script found to be executed after sucessfull login:\n"+ execImmediateExpression);
+					
+					if (execImmediateExpression.trim().toLowerCase().startsWith("exec "))
+						execImmediateExpression = execImmediateExpression.substring(4);
+
+					if (execImmediateExpression.trim().endsWith(";") == false)
+						execImmediateExpression = execImmediateExpression+";";
+					
+					execImmediateExpression = "declare\nbegin\n"+execImmediateExpression+"\nend;";	
+					logger.debug("Script modified to:\n"+ execImmediateExpression);
+						try {
+							CallableStatement scriptExec = DataJumper.conn.prepareCall( execImmediateExpression );
+							scriptExec.execute();
+							scriptExec.close();
+							logger.debug("Script executed sucessfully");
+						} catch (SQLException sq) {
+							ErrorMessage.showException(sq,"Error while executing the script:\n"+execImmediateExpression);
+							logger.error("Error while executing the script:\n"+execImmediateExpression+"\n"+sq.getMessage()+"\n"+ErrorMessage.showStackTrace(sq.getStackTrace()));	
+						}
+					
+				}
+
 				return DataJumper.conn;
 			} catch (SQLException sq) {
 				ErrorMessage.showException(sq,"Error while connecting to "+dbType+" DB server!");
@@ -61,7 +87,7 @@ public class DBConnections {
 	if (dbType.equals("MySQL")){	
 		
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
+			Class.forName("com.mysql.cj.jdbc.Driver");
 		}
 		catch (ClassNotFoundException a) {
 			ErrorMessage.showException(a,"MySQL JDBC Driver not found");
@@ -72,7 +98,7 @@ public class DBConnections {
 					DataJumper.conn = DriverManager.getConnection(thinConn, userName,
 							Encrpt.decrypt(password,DataBaseLogin3.kb));
 					DataJumper.conn.setAutoCommit(false);
-					logger.info("Connected sucessfully to "+ DataJumper.conn.getMetaData().getDatabaseProductName()+" server, version "+ DataJumper.conn.getMetaData().getDatabaseProductVersion());			
+					logger.debug("Connected sucessfully to "+ DataJumper.conn.getMetaData().getDatabaseProductName()+" server, version "+ DataJumper.conn.getMetaData().getDatabaseProductVersion());			
 					return DataJumper.conn;
 				} catch (SQLException sq) {
 					ErrorMessage.showException(sq,"Error while connecting to MySQL server!");

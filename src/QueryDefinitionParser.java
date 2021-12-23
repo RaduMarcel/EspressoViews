@@ -399,9 +399,10 @@ protected static Document getXmlDocument(String filePath) {
 	int anfrageCounter=0;
 	StringBuilder validationComments= new StringBuilder("");
 	LinkedList<String> queryLabels = new LinkedList<String>();
+	String queryLabel="", executeOnFirstRun;
 	for (Map<String,String> queryDef: xmlExtrakt){
 		anfrageCounter++;	
-		String queryLabel="";
+		
 		if (queryDef.get("SQLQUERYLABEL")==null || queryDef.get("SQLQUERYLABEL").trim().equals("")){ 
 //			validationComments.append("Die Anfragedefinition "+ queryLabel+" hat keinen Namen.\nGeben Sie der Anfragedefinition einen Namen und tragen Sie diesen bitte in den XML-tag SQLQueryLabel wie folgt ein:" +
 //					"\n <SQLQueryLabel>passender Name</SQLQueryLabel>.\n\n");
@@ -426,6 +427,10 @@ protected static Document getXmlDocument(String filePath) {
 		if ( ( anfrageCounter==1 && queryDef.get("SUPERSQLQUERY")!=null && !queryDef.get("SUPERSQLQUERY").trim().equals(""))  )
 //			validationComments.append("Die erste Anfragedefinition darf keiner anderen Anfragedefinition untergeordnet werden.\nLöschen Sie den XML-tag SuperSQLQuery aus der Anfragedefinition "+queryLabel+"\n\n");
 			validationComments.append("The first report entity cannot be subordinated to any other report entity.\nDelete the XML tag SuperSQLQuery from the report entity "+queryLabel+"\n\n");
+		executeOnFirstRun = queryDef.get("EXECUTEONFIRSTRUN");
+		if (  anfrageCounter==1 && executeOnFirstRun!=null && (executeOnFirstRun.trim().equals("FALSE")||executeOnFirstRun.trim().equals("NO")||executeOnFirstRun.trim().equals("0")||executeOnFirstRun.trim().equals("-1")) ) 
+//			validationComments.append("Die erste Anfragedefinition darf keiner anderen Anfragedefinition untergeordnet werden.\nLöschen Sie den XML-tag SuperSQLQuery aus der Anfragedefinition "+queryLabel+"\n\n");
+			validationComments.append("The option executeOnFirstRun cannot be diabled for the very first report entity.\nRemove the option executeOnFirstRun or set the value to \"true\" in the report entity "+queryLabel+"\n\n");
 	
 		if (  anfrageCounter>1 
 			   && queryDef.get("SUPERSQLQUERY")!=null 
@@ -454,6 +459,7 @@ protected static Document getXmlDocument(String filePath) {
 				query=query.substring(0, query.length()-1).trim();				
 			}
 			String queryLabel = queryDef.get("SQLQUERYLABEL").trim(); 
+			String executeOnFirstRun = queryDef.get("EXECUTEONFIRSTRUN");
 			String suppressDisplayIfNoData = queryDef.get("SUPPRESSDISPLAYIFNODATA"); 
 			String maximumResultRows = queryDef.get("MAXRESULTROWS");
 
@@ -481,8 +487,15 @@ protected static Document getXmlDocument(String filePath) {
 				for (int x=0; x<resultCols.length; x++)
 					result.get(result.size()-1).addResultColumn(resultCols[x].toUpperCase());
 			}
-			if (suppressDisplayIfNoData!=null && (suppressDisplayIfNoData.equals("TRUE")||suppressDisplayIfNoData.equals("YES")||suppressDisplayIfNoData.equals("1")) )
+			
+			if (suppressDisplayIfNoData!=null && suppressDisplayIfNoData.trim()!=null && (suppressDisplayIfNoData.trim().equals("TRUE")||suppressDisplayIfNoData.trim().equals("YES")||suppressDisplayIfNoData.trim().equals("1")) )
 				result.get(result.size()-1).setSuppressDisplayIfNoData(true);
+			
+			if (executeOnFirstRun!=null && executeOnFirstRun.trim()!=null && (executeOnFirstRun.trim().equals("FALSE")||executeOnFirstRun.trim().equals("NO")||executeOnFirstRun.trim().equals("0")||executeOnFirstRun.trim().equals("-1"))  )
+				result.get(result.size()-1).setExecuteOnFirstRun(false);
+			else 
+				result.get(result.size()-1).setExecuteOnFirstRun(true);
+			
 			if (maximumResultRows!= null)
 				result.get(result.size()-1).setMaximumResultRows (new Integer(maximumResultRows));
 			else 
