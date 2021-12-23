@@ -48,7 +48,6 @@ If the application has started correctly, then you should be able to see this da
 
 As of now this tool supports Oracle and MySQL.
 
-Now, to use and generate an EspressoViews report you need:
 
 **2. An XML report definition file.**
 
