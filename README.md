@@ -26,7 +26,7 @@ You should first [read how to define an EspressoViews report][ReportDef] and the
 
 **1. Java Runtime**
 
-You need to have the Java Runtime installed installed on your machine. The plain report code requiers the version 1.7. But the provided the JDBC drivers, which are used to connect with the database server, require at least Java 1.8. You can replace the provided JDBC driver packages with older versions if you have to stick with the version 1.7 (see further down information how to replace the JDBC driver packages).
+You need to have the Java Runtime installed installed on your machine. The plain report code requiers the version 1.7. But the provided JDBC drivers, which are used to connect and exchange with the database server, require at least Java 1.8. You can replace the provided JDBC driver packages with older versions if you have to stick with the version 1.7 (see further down information how to replace the JDBC driver packages).
 
 To check the version of your Java Runtime type in the command line:
 ```
@@ -57,7 +57,7 @@ This definition file is made of your SQLs queries and of instructions, which spe
 [ReportDef]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
 [ReportSyntax]: https://github.com/RaduMarcel/EspressoViews-/wiki/4.-The-XML-report-definition-syntax
 
-**3. The connection credentials for the (Oracle or MySQL) database server where the report definition file should be ran.**
+**3. The connection credentials for a (Oracle or MySQL) database server**
 
 The `EspressoViews.zip` file contains the JDBC driver packages for the suported database server. They are placed in the folder `EspressoViews_vx.xx_lib`. The provided JDBC diver for Oracle databases works at least with the Oracle Versions between 12.1 and 21.1 and the JDBC driver for MySQL databases works at least with the MySQL versions 5.6, 5.7 and 8.0
 These drivers can be also downloaded from internet and you should do so if the version provided is not compatible with the database system version you try to access.
