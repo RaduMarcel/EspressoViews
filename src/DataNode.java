@@ -3,15 +3,14 @@ import java.util.*;
 import javax.swing.tree.*;
 class DataNode {
 	private DataNode parent;
-
 	private LinkedList<DataNode> children = new LinkedList<DataNode>();
 	private boolean[] isResultColumn;
 	String values,columns, viewOption;
 	private String[] valueArray, resultValueArray;
 	private String[] columnArray, resultColumnArray;	
-	int childNumber; 
+	int childNumber; //Ordinalzahl. Gibt die Position des Nodes als Kind innerhalb der Kinderliste an. 0 ist das erste Kind 
 	Map<String,Integer> maxColumnLength;
-	boolean isLabel;
+	boolean isLabel, queryOnDemand;
 	AnfragePlan anfrage;
 
 	DataNode(String cont) {
@@ -24,6 +23,7 @@ class DataNode {
 		values = "null";	
 		valueArray=this.values.split("@°@");
 	}
+	
 	DataNode(String cont, DataNode parent) {
 		this(cont);
 		this.parent=parent;
@@ -57,9 +57,33 @@ class DataNode {
 	DataNode getParent() {
 		return parent;
 	}
+	boolean hasParent() {
+		if (parent==null) return false;
+		return true;
+	}
 	
 	void setParent(DataNode p) {
 		parent = p;
+	}
+	public boolean isQueryOnDemand() {
+		return queryOnDemand;
+	}
+	public boolean isAncestorQueryOnDemand() {
+		if (this.hasParent()==false)
+			return false;		
+		return getParent().rekIsAncestorQueryOnDemand();
+	}
+	private boolean rekIsAncestorQueryOnDemand() {
+		if (queryOnDemand) 
+			return true;
+		if (this.hasParent()==false)
+			return false;
+		return getParent().rekIsAncestorQueryOnDemand();
+	}
+	
+	
+	public void setQueryOnDemand(boolean queryOnDemand) {
+		this.queryOnDemand = queryOnDemand;
 	}
 	
 	public String getViewOption() {
@@ -90,6 +114,9 @@ class DataNode {
 	}
 	LinkedList<DataNode> getChildren() {
 		return children;
+	}
+	public void setChildren(LinkedList<DataNode>newChildren) {
+		this.children= newChildren;
 	}
 	DataNode getFirstChild(){
 		LinkedList<DataNode> children = this.getChildren();
@@ -159,10 +186,10 @@ class DataNode {
 //		}				
 //	}
 
-void determinetMaxColumnLength(DataNode node){		
+void determineMaxColumnLength(DataNode node){		
 		if (node.children!=null ){
 		 for (DataNode kindchen:node.children)//Preorder Baumdurchlauf
-				determinetMaxColumnLength(kindchen);
+				determineMaxColumnLength(kindchen);
 		 }
 			
 	if (!node.isLabel){ 
@@ -315,7 +342,7 @@ void determinetMaxColumnLength(DataNode node){
 	@Override
 	public String toString() {
 		return  "columnArray=" + Arrays.toString(columnArray) +"  "+ 
-				"[valueArray=" + Arrays.toString(valueArray) ;
+				"valueArray=" + Arrays.toString(valueArray) ;
 		
 	}
 }

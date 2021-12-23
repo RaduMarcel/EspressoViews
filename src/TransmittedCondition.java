@@ -19,6 +19,11 @@ public TransmittedCondition(String identifier, String value, int depth,boolean i
 	this(identifier,value,depth);
 	this.inheritanceIsNotApplicable=isNotApplicable;
 }
+public static TransmittedCondition cloneCondition (TransmittedCondition toClone){
+	TransmittedCondition clone = new TransmittedCondition(toClone.getIdentifier(),toClone.getValue(),toClone.getDepth(),toClone.inheritanceIsNotApplicable());
+	return clone;
+}
+
 public String getValue() {
 	return value;
 }
@@ -74,8 +79,8 @@ public boolean equals(Object anObject) {
         return true;
     }
     if (anObject instanceof TransmittedCondition) {
-    	TransmittedCondition antherTransCond = (TransmittedCondition)anObject;	 
-    	return this.getIdentifier().toUpperCase().equals(antherTransCond.getIdentifier().toUpperCase());
+    	TransmittedCondition anotherTransCond = (TransmittedCondition)anObject;	 
+    	return this.getIdentifier().toUpperCase().equals(anotherTransCond.getIdentifier().toUpperCase());
     }
     return false;
 }
