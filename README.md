@@ -5,7 +5,7 @@
 
 - EspressoViews merges the results of many SQL statements and displays them in a data tree, which can be expanded and collapsed by the user. 
 
-- It is [designed][Ideas] to connect a theoretically unlimited number SQLs to a report as simple as adding phrases to a text.  
+- It connects a theoretically unlimited number SQLs to a report as simple as adding phrases to a text.  
 
 - More About? Check the [Wiki][Wiki] pages!
 
@@ -15,12 +15,6 @@
 ### How to generate an Espresso Views Report 
 
 You should first [read how to define an EspressoViews report][ReportDef] and then follow [the few syntax rules needed to create a report definiton XML file][ReportSyntax]. And finally you connect to a database server using EspressoViews and you let the tool process your report defintion file. 
-
-- A report is made of at least two report units 
-
-- A report unit is built around a single SQL query. The above example is made of three units, but theoretically there is no limitation as long as the whole structure is a tree structure. 
-
-- Any report definition file can be on his side embedded in another report definition file. Also here there is no limitation as long as the linked files are defining a tree structure
 
 
 [Ideas]: https://github.com/RaduMarcel/EspressoViews-/wiki/2.-The-main-ideas-behind-this-tool
