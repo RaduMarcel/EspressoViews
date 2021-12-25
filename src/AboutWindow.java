@@ -66,7 +66,7 @@ public class AboutWindow extends JDialog {
 		dtrpnhalloconvertMe.setText("<html>\r\n</head>\r\n" +
 								    "<body style=\"background: transparent\">\r\n" +
 								    "<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\n<font face=\"Times New Roman, serif\"><font size=\"6\" style=\"font-size: 24pt\"><b>Espresso\r\nViews</b></font></font>" +
-								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nVersion 0.61.0 \r\n" +
+								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nVersion 0.61.1 \r\n" +
 								    "</p>\r\n<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nlast changed: Marburg, Germany, December 2021</p>\r\n" +
 								    "<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">\r\nCopyright <font face=\"Liberation Serif, serif\">&copy; Radu-Marcel\r\nDumitru</font></p>\r\n" +
 								    "<p align=\"center\" style=\"margin-bottom: 0cm; line-height: 100%; text-decoration: none\">https://github.com/RaduMarcel/EspressoViews </font></p>\r\n" +

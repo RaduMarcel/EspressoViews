@@ -115,7 +115,7 @@ public class DisplayData {
 	static void  generateJointDisplayRek(AnfragePlan anfrage, HashMap<String,TransmittedCondition> inheritedJointCond, int level, DataNode result, String viewOption, boolean isFirstRun ){
 		if (anfrage.isSuppressDisplayIfNoData() && anfrage.isEmptyResultset()
 				//&& !(isFirstRun && !anfrage.isExecuteOnFirstRun()) 
-				&& !( !anfrage.isExecuteOnFirstRun() ||!anfrage.isAncestorExecuteOnFirstRun())
+				&& ( anfrage.isExecuteOnFirstRun() || anfrage.isDataRetrievalTriggeredByGUI())
 				) 
 				return;//Wenn die Option isSuppressDisplayIfNoData verwendet wird, dann werden leere Ergebnisss‰tze nicht dargestellt 
 		String resultMatrix[][] = anfrage.getResultRowsMatrix();
@@ -232,7 +232,7 @@ public class DisplayData {
 //												HIER ENDET DER RECHENINTENSIVE BEREICH!!!!!
 
 		if (newChild.getChildren().size()== 0){ 
-			if (anfrage.isSuppressDisplayIfNoData() && anfrage.isExecuteOnFirstRun() && anfrage.isAncestorExecuteOnFirstRun()) {  
+			if (anfrage.isSuppressDisplayIfNoData() && (  anfrage.isExecuteOnFirstRun() ||anfrage.isDataRetrievalTriggeredByGUI() )   ) {  
 				result.getChildren().remove(newChild);//Label-Stummel werden beseitigt, wenn die Option isSuppressDisplayIfNoData verwendet wird, auﬂer wenn execute on first run benutzt wird
 			}	
 			else{

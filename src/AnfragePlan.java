@@ -8,7 +8,7 @@ public class AnfragePlan {
 	AnfragePlan superSQLQuery;
 	List<AnfragePlan> subQueries; //sqlQuery children 
 	private List<String> resultColumns, allResultColumns;	//variable set of columns to be displayed
-	private boolean dataGenerated, conditionsReceived, suppressDisplayIfNoData, executeOnFirstRun;
+	private boolean dataGenerated, conditionsReceived, suppressDisplayIfNoData, executeOnFirstRun, dataRetrievalTriggeredByGUI;
 	private boolean emptyResultset;
 	private String sqlQuery,sqlQueryLabel,rebuiltQuery, dynamicSqlQuery; //the SQL Query
 	private Set<String> transmittedConditionColumns;//the column names supposed to be inherited by the children in the where-clause of this sqlQuery
@@ -215,6 +215,12 @@ public class AnfragePlan {
 	public void setAllResultColumns(List<String> allResultColumns) {
 		this.allResultColumns = allResultColumns;
 	}
+	public boolean isDataRetrievalTriggeredByGUI() {
+		return dataRetrievalTriggeredByGUI;
+	}
+	public void setDataRetrievalTriggeredByGUI(boolean dataRetrievalTriggeredByGUI) {
+		this.dataRetrievalTriggeredByGUI = dataRetrievalTriggeredByGUI;
+	}
 
 @SuppressWarnings("unchecked")
 public boolean generateData(Connection conn, JTextArea txtProgressgMessage, boolean isFirstRun) throws Exception{
@@ -406,7 +412,7 @@ for (int t=0; t<resultRowsMatrix.length;t++  ) {
 			else
 				this.transmittedConditions.get(
 							this.transmittedConditions.indexOf(new TransmittedCondition(columnName,null,0))
-							).setValue(" in ("+getElementsWithSeparator((AbstractCollection<String>)(conditionValues),",") +")");
+							).setValue(" in ("+getElementsWithSeparator((AbstractCollection<String>)(conditionValues),",").replaceAll("'null'", "null") +")");
 		}
 			if (conditionValues.size()==0 && hasMoreThan1000Expressions==false) 
 				this.transmittedConditions.add(new TransmittedCondition(columnName, " = null",1));//damit wird der Ergebnissatz null, denn die applicable condition hat keine Werte zum weitergeben 

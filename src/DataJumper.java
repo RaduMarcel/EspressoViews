@@ -460,7 +460,7 @@ txtProgressgMessage.append("Start to generate the report display.\n");
 									tc.setValue(" in ('"+tc.getValue()+"')");
 																
 							}
-							//logger.info("neu berechnete transmittedConditions" + selectedPlan.transmittedConditions );
+							logger.debug("neu berechnete transmittedConditions" + selectedPlan.transmittedConditions );
 							
 								try{
 									boolean success= AnfragePlan.generateAllTempTables(conn,selectedPlan);
@@ -487,11 +487,11 @@ txtProgressgMessage.append("Start to generate the report display.\n");
 									ErrorMessage.showException(e,"An unexpected error occured while retrieving and caching the data");
 									logger.error("An unexpected error occured while retrieving and caching the data\n"+e);
 								}
-						DefaultMutableTreeNode addOn = DisplayData.generateJointDisplay(selectedPlan,"the dynamic add",viewOption,false);	
-//						 newNode=new DataNode("Dynamic Column@∞@", "Dynamic Content@∞@",  firstChildNode.getParent());
-//						 newNode.setViewOption(firstChildNode.getParent().getViewOption());
-//						 newNode.determineMaxColumnLength(newNode);
+						selectedPlan.setDataRetrievalTriggeredByGUI(true);		
+						DefaultMutableTreeNode addOn = DisplayData.generateJointDisplay(selectedPlan,"the dynamic add",viewOption,false);
+						selectedPlan.setDataRetrievalTriggeredByGUI(false);
 						if (addOn!=null){ 
+						//der neue Teilbaum wird an den Hauptbaum angeh‰ngt	
 							logger.debug("Generierter Datenbaum\n"+DisplayData.showTreeStructureDebug(addOn, true) );
 							model.removeNodeFromParent((MutableTreeNode) selectedTreeNode.getFirstChild());//der dummy record wird aus dem JavaTree verschwinden. Bei einer Query, die mit create on demand gestartet wird, gibt es schon den Label, das heiﬂt, der jetzt erzeugte query label wird nicht mehr gebraucht, sondern nur noch seine Kinder  
 							labelNode.setChildren(new LinkedList<DataNode>());//der dummy record mit null values muss auch aus dem DataNode Baum entfernt werden
