@@ -50,7 +50,7 @@ public class DisplayData {
 		anfang.viewOption=viewOption;
 		anfang.isLabel=true;
 		generateStructDisplayRek(anfrage,anfang,1);
-		anfang.determineMaxColumnLength(anfang);
+		anfang.setNodeBranchInfo(anfang);
 		anfang.propagateViewOption();
 		//showTree(anfang,0);
 		return anfang.composeTree();
@@ -85,6 +85,7 @@ public class DisplayData {
 		DataNode anfang = new DataNode(titelText);
 		anfang.viewOption=viewOption;
 		anfang.isLabel=true;
+		anfang.anfrage=anfrage;
 		HashMap<String,TransmittedCondition> forwardJointCond = null;
 		if (!isFirstRun && anfrage.transmittedConditions!=null && !anfrage.transmittedConditions.isEmpty()){//Die erste Anfrage bei einem nicht-ersten Run kann Bedingungen übernommen haben, die müssen auch weitergegeben werden.
 			forwardJointCond= new HashMap<String,TransmittedCondition>();
@@ -105,7 +106,7 @@ public class DisplayData {
 		if (!isFirstRun && anfang.getChildren()!=null && anfang.getChildren().size()>0)  
 			anfang = anfang.getFirstChild(); //der erste Label mit dem titleText ist für nicht-firstRuns unnötig und wird gelöscht
 		//showTree(anfang,1);
-		anfang.determineMaxColumnLength(anfang);
+		anfang.setNodeBranchInfo(anfang);
 		//showTree(anfang,1);
 		if (!isFirstRun && anfang.getChildren() == null)
 			return null;
@@ -125,6 +126,7 @@ public class DisplayData {
 		resultColumns.addAll(anfrage.getResultColumns());
 		//System.out.println(multiplyChars(' ',(level-1)*10)+anfrage.getQueryName());
 		DataNode newChild = result.insertDeep(new DataNode(anfrage.getQueryName()));
+		newChild.anfrage=anfrage;
 		newChild.isLabel = true;
 		HashMap<String,TransmittedCondition> forwardJointCond = new HashMap<String,TransmittedCondition>();
 			for (TransmittedCondition condi: anfrage.transmittedConditions){//Erzeugt Liste von zu vererbenden Joint Bedingungen für eine ResultMatrix 
@@ -139,7 +141,7 @@ public class DisplayData {
 					}
 				forwardJointCond.put(forwardCondi.getIdentifier(),forwardCondi);	
 			}
-			HashMap <Integer,String> columnNamesUpperCase = new HashMap <Integer,String>();//Die Join-Operation ist zum Teil sehr rechenaufwendig. Um die upperCase operationen zu minimieren, werden die column name einmal zu upperCase umgewandelt    	
+		HashMap <Integer,String> columnNamesUpperCase = new HashMap <Integer,String>();//Die Join-Operation ist zum Teil sehr rechenaufwendig. Um die upperCase operationen zu minimieren, werden die column name einmal zu upperCase umgewandelt    	
 		boolean included =true;
 		if (resultColumns.size() != 0 && resultColumns.get(0).trim().toUpperCase().startsWith("NOT:")){
 			included=false;//Wenn der erste Eintrag im Resultcolumn mit not: Anfängt, dann werden alle angebenen Felder aus der Anzeige ausgeschlossen und die übrigen Felder ausgewählt 
@@ -153,12 +155,14 @@ public class DisplayData {
 				columnNamesUpperCase.put(t, resultMatrix[t][0].toUpperCase());
 				resultLineColumnNames.append(resultMatrix[t][0]+"@°@"); //Zeigt den Namen der columns
 				if (resultColumns.size() == 0 || DataJumper.containsCaseInsensitive(resultColumns,resultMatrix[t][0])==included )
-					isResultColumn[t]=true;
-//				else isResultColumn[t]=false;   
+					if (anfrage.getEmptyColumnDisplayMode().equals("SUPPRESS") && anfrage.getIsColumnNull()!=null && anfrage.getIsColumnNull().containsKey(resultMatrix[t][0]) && anfrage.getIsColumnNull().get(resultMatrix[t][0]) )
+						isResultColumn[t]=false;
+					else
+						isResultColumn[t]=true;
 			}
 		}
 		else {
-			logger.debug("AnfragePlan vor der Generierung des Datenbaums\n"+anfrage.showAnfragePlan(true) );
+			//logger.debug("AnfragePlan vor der Generierung des Datenbaums\n"+anfrage.showAnfragePlan(true) );
 			Set<String> inheritedCondAttr = anfrage.getInheritedApplicableConditions();
 			Set<String> forwardedCondAttr = anfrage.getNewTransmittedConditionColumns();
 			for (int t=0; t<resultMatrix.length; t++){
@@ -176,8 +180,12 @@ public class DisplayData {
 			}
 		}
 		if (!Arrays.toString(isResultColumn).contains("true"))//wenn aber sämtliche Spaltennamen aus dem resultColumns-liste mit keinem Spaltennamen aus der SQL übereinstimmen, werden alle SQL Spaltennamen angezeigt
-			for (int t=0; t<isResultColumn.length;t++)
-				isResultColumn[t]=true;
+			for (int t=0; t<isResultColumn.length;t++){
+				if (anfrage.getIsColumnNull()!=null && anfrage.getIsColumnNull().containsKey(resultMatrix[t][0]) && anfrage.getIsColumnNull().get(resultMatrix[t][0]))//... vorausgesetzt die empty-column-display-Option ist mit dem Wert "Supress" gesetzt die eine oder andere Spalte ist null  
+					isResultColumn[t]=false;
+				else
+					isResultColumn[t]=true;
+			}
 		if (anfrage.getInheritedApplicableConditions() != null)
 		logger.debug("Try sub-ordinate rows of "+anfrage.getQueryName()+" to "+anfrage.getSuperSQLQuery().getQueryName()+"\n"+resultLineColumnNames.toString().replace("@°@", ","));
 		//												HIER BEGINNT DER RECHENINTENSIVE BEREICH!!!!! 		
@@ -218,6 +226,7 @@ public class DisplayData {
 													resultLine.toString().substring(0, resultLine.length()-3),newChild);
 				logger.debug("The Line "+newestChild.getValues().replace("@°@", ",")+" MATCHED these conditions: "+ inheritedJointCond);
 				newestChild.setIsResultColumn(isResultColumn);
+				newestChild.anfrage=anfrage;
 				newChild.insertOnLevel(newestChild);
 				if (!anfrage.subQueries.isEmpty()){
 					int t=0;
@@ -242,6 +251,7 @@ public class DisplayData {
 			DataNode newestChild = new DataNode (resultLineColumnNames.toString().substring(0, resultLineColumnNames.length()-3),
 										    resultLine.toString().substring(0, resultLine.length()-3),newChild);
 			newestChild.setIsResultColumn(isResultColumn);
+			newestChild.anfrage=anfrage;
 			newChild.insertOnLevel(newestChild);
 	
 			if (//isFirstRun && 
@@ -352,6 +362,8 @@ static String generateSelectionDisplay (TreePath [] tp, String separator, boolea
 	}
 
 static String showTreeStructureDebug(DefaultMutableTreeNode tree,boolean includeSubTrees){
+	if (tree==null || tree.getUserObject()==null)
+		return "Empty Tree";
 	StringBuilder result=new StringBuilder("");
 	result.append(rekShowTreeStructureDebug(tree,includeSubTrees, 1));
 	return result.toString();
@@ -366,7 +378,7 @@ static String rekShowTreeStructureDebug(DefaultMutableTreeNode tree,boolean incl
 		node = (DataNode) tree.getUserObject();
 		result.append(spaces + node.toString() + "\n");
 		//result.append(spaces + node.getValueArray() + "\n");
-		//result.append(spaces + node.getIsResultColumn() + "\n");
+		result.append(spaces + "Column is always null in Data Branch: "+node.getIsColumnNull() + "\n");
 		result.append(spaces + "Is query on demand: " + node.isQueryOnDemand() + ", Is ancestor query on demand: " + node.isAncestorQueryOnDemand() +  "\n");
 		result.append(spaces + "Parent Node: " + node.getParent() +  "\n");
 		result.append(spaces + "First Child: " + node.getChildren() +  "\n");
@@ -447,10 +459,10 @@ static String generateSqlQueryFromTreeElement(
 				break;
 			}
 		}
-		if (originalSql.toLowerCase().lastIndexOf("order by")>0){//Die order by clauses is entnommen, um am Ende der neuen Query angehängt zu werden  
-			orderBy=" "+originalSql.substring(originalSql.toLowerCase().lastIndexOf("order by"));
+		if (allePlaene.get(1).getDb().equals("MySql") && originalSql.toLowerCase().lastIndexOf("order by")>0){//Die order by clauses is entnommen, um am Ende der neuen Query angehängt zu werden  
+			orderBy = " "+originalSql.substring(originalSql.toLowerCase().lastIndexOf("order by"));
+			//orderBy = removeAliases(orderBy);//Tabellenreferenzen oder Aliase müssen leider abgenommen werden, da die innerquery referenzen nicht in der Außenrquery funktionieren  
 			if ( !orderBy.toLowerCase().contains("where ") || !orderBy.toLowerCase().contains("from ") || !orderBy.toLowerCase().contains("select ") ){
-				originalSql=originalSql.replace(orderBy, "");
 			}
 		}
 		
@@ -497,7 +509,23 @@ static String generateSqlQueryFromTreeElement(
 		for (int t=1;t<multiplier; t++){
 			result.append(ch);
 		}	
-return result.toString();	
-}
+	return result.toString();	
+	}
 	
+	static String removeAliases(String expression){
+		if (!expression.contains(".")) 
+			return expression;
+		StringBuilder exp = new StringBuilder (expression);
+		
+		if (exp.indexOf(".") == exp.lastIndexOf(".") )//es gibt nur einen alias
+			{
+			  
+			}
+			
+			
+//		while (expression.contains(".")) {
+//			expression= expression.substring(0,) 
+//		}
+		return expression;
+	}
 }

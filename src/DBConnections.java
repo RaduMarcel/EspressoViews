@@ -13,14 +13,14 @@ import java.sql.CallableStatement;
 public class DBConnections {
 	private static Logger logger = LogManager.getLogger(DBConnections.class.getName());	
 	static Connection getNewConnection(String dbType,String serviceName, String host, String port, String connType, String userName, String password,String execImmediateExpression)  {
-		System.out.println("execImmediateExpression "+execImmediateExpression);
+		//System.out.println("execImmediateExpression "+execImmediateExpression);
 		if (dbType.equals("Oracle")){
 			// DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
 			try {
 				Class.forName("oracle.jdbc.OracleDriver");
 			}
 			catch (ClassNotFoundException a) {
-				ErrorMessage.showException(a,"MySQL JDBC Driver not found");
+				ErrorMessage.showException(a,"Oracle JDBC Driver not found");
 				return null;
 			}
 			//		Enumeration<Driver> theDriver = DriverManager.getDrivers();

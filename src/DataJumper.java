@@ -364,22 +364,20 @@ txtProgressgMessage.append("Start to generate the report display.\n");
 //An diesem Punkt existiert eine Anfrage-hierarchie mit angehängten Datenblöcken. Ab jetzt werden die einzelnen Datenzeilen zu einem Jtree Datenbaum verschachtelt.  
 	try{		
 		if (viewOption.equals("detailed")){
-			boolean hasData = true;
-			for (AnfragePlan ap : allePlaene){
-				if (ap.hasData()==false){
-					ErrorMessage.showException("Report Data was lost from memory. Please reload the report to regenerate the data\n");
-					txtProgressgMessage.append("Report Data was lost from memory. Please reload the report to regenerate the data\n");
-					logger.error("Report Data was lost from memory. Please reload the report to regenerate the data\n");
-					hasData = false;
-					break;
-				}
+			if (!hasDataAnfragePlanTree())
+			{
+				ErrorMessage.showException("Report Data was lost from memory. Please reload the report to regenerate the data\n");
+				txtProgressgMessage.append("Report Data was lost from memory. Please reload the report to regenerate the data\n");
+				logger.error("Report Data was lost from memory. Please reload the report to regenerate the data\n");
+				return new JScrollPane(txtProgressgMessage);
 			}
-			if (hasData)
+			else{
 				wurzel = DisplayData.generateJointDisplay(allePlaene.get(0),"Definition File "+new File(file).getName()+ " applied on "+connectionName+". Captured on "+Calendar.getInstance().getTime().toString(),viewOption,true);
-			else return new JScrollPane(txtProgressgMessage); 
+			}
 				
 		}
 		logger.debug("Raw display data generated for Definition File "+new File(file).getName()+ " applied on "+connectionName+". Captured on "+Calendar.getInstance().getTime().toString());
+		logger.debug("The whole data tree: \n"+DisplayData.showTreeStructureDebug(wurzel,true));
 		
 		if (viewOption.equals("compact")){
 			boolean isSupported = true;
@@ -398,6 +396,13 @@ txtProgressgMessage.append("Start to generate the report display.\n");
 			else return new JScrollPane(txtProgressgMessage); 	
 		}
 		if (viewOption.equals("structure")){
+			if (!hasDataAnfragePlanTree())
+			{
+				ErrorMessage.showException("Report Data was lost from memory. Please reload the report to regenerate the data\n");
+				txtProgressgMessage.append("Report Data was lost from memory. Please reload the report to regenerate the data\n");
+				logger.error("Report Data was lost from memory. Please reload the report to regenerate the data\n");
+				return new JScrollPane(txtProgressgMessage);
+			}
 			wurzel = DisplayData.generateStructDisplay(allePlaene.get(0),"Overview of the definition file "+file,viewOption);
 			logger.debug("Generated raw data for the overview of the definition file "+file,viewOption);
 		}
@@ -501,7 +506,8 @@ txtProgressgMessage.append("Start to generate the report display.\n");
 								labelNode.insertOnLevel(addOnChild);
 								addOnChild.setParent(labelNode);
 							}
-							labelNode.getFirstChild().setQueryOnDemand(false);
+							if (labelNode.getFirstChild()!=null)
+								labelNode.getFirstChild().setQueryOnDemand(false);
 							for (int childNr=0; labelNode.getChildren().size()>childNr; childNr++){
 								DefaultMutableTreeNode newLine = getTreeNodeForDataNode(addOn,labelNode.getChildren().get(childNr));  
 										//(DefaultMutableTreeNode) addOn.getFirstChild();
@@ -653,6 +659,17 @@ long GUIGenerated =  new Date().getTime();
 		dialog.setVisible(true);
 		return null;
 	}
+}
+
+boolean hasDataAnfragePlanTree() {
+	boolean hasData = true;
+	for (AnfragePlan ap : allePlaene){
+		if (ap.hasData()==false){
+			hasData = false;
+			break;
+		}
+	}
+	return hasData;
 }
 	
 	
@@ -839,7 +856,7 @@ class RightClickOptionMenu extends JPopupMenu{
 
 	class MenuItemListener implements ActionListener {
 		  public void actionPerformed(ActionEvent e) {
-			  DefaultMutableTreeNode currNode= (DefaultMutableTreeNode)(selPath.getLastPathComponent()); 
+			  DefaultMutableTreeNode currNode = (DefaultMutableTreeNode)(selPath.getLastPathComponent()); 
               DataNode selectedDataNodeLabel=null;
 			  String selection = null;
 			  String separator=null;

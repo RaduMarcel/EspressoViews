@@ -15,8 +15,9 @@ public class AnfragePlan {
 	List<TransmittedCondition> transmittedConditions; //the where clause supposed to be inherited by the children of this sqlQuery	
 	StringBuilder  inheritedConditions; //columns from the super-sqlQuery that will be added to the where clause of the sqlQuery   
 	private int maxInheritanceDepth, maximumResultRows;
-
-	private String tempTable;
+	private String emptyColumnDisplayMode;
+	private Map<String,Boolean> isColumnNull;
+	private String tempTable, db; 
 	private String[][] resultRowsMatrix;
 	
 	AnfragePlan(String query,String queryLabel ) {
@@ -27,6 +28,7 @@ public class AnfragePlan {
 		subQueries = new LinkedList<AnfragePlan>();
 		resultColumns = new LinkedList<String>();
 		allResultColumns = new LinkedList<String>();
+		isColumnNull	 = new HashMap<String,Boolean>(); 	
 	}
 	
 	AnfragePlan(String query, String queryName, AnfragePlan superQuery, int maxInheritanceDepth) {
@@ -41,6 +43,9 @@ public class AnfragePlan {
 	@Override
 	public String toString() {
 		return this.sqlQueryLabel;
+	}
+	public String getDb() {
+		return db;
 	}
 	public String getSqlQuery() {
 		return sqlQuery;
@@ -221,6 +226,18 @@ public class AnfragePlan {
 	public void setDataRetrievalTriggeredByGUI(boolean dataRetrievalTriggeredByGUI) {
 		this.dataRetrievalTriggeredByGUI = dataRetrievalTriggeredByGUI;
 	}
+	public String getEmptyColumnDisplayMode() {
+		return emptyColumnDisplayMode;
+	}
+	public void setEmptyColumnDisplayMode(String emptyColumnDisplayMode) {
+		this.emptyColumnDisplayMode = emptyColumnDisplayMode;
+	}
+	public Map<String, Boolean> getIsColumnNull() {
+		return isColumnNull;
+	}
+	public void setIsColumnNull(Map<String, Boolean> isColumnNull) {
+		this.isColumnNull = isColumnNull;
+	}
 
 @SuppressWarnings("unchecked")
 public boolean generateData(Connection conn, JTextArea txtProgressgMessage, boolean isFirstRun) throws Exception{
@@ -348,7 +365,7 @@ this.rebuiltQuery = this.sqlQuery;
 			setTransmittedConditions(); //das Erbe, also die where-clause Einschränkung auf column_names, wird, sofern möglich, mit Values aus dem eigenen Ergebnissatz aufgefrischt 
 			}
 	}catch (SQLException sq) {
-		ErrorMessage.showException(sq,"Database server has thrown an SQL error while executing the query "+this.sqlQueryLabel+":\n"+this.sqlQuery+"\n");
+		ErrorMessage.showException(sq,"Database server has thrown an SQL error while executing the query "+this.sqlQueryLabel+":\n"+this.rebuiltQuery+"\n");
 		logger.error("Database server has thrown an SQL error while executing the query:\n"+this.sqlQueryLabel+":\n"+this.rebuiltQuery+"\n"+sq.getMessage()+"\n"+ErrorMessage.showStackTrace(sq.getStackTrace()));
 		DBConnections.dropAllTempTables();
 		return false;
@@ -535,31 +552,37 @@ String getDisplayData=null,SQLExecutionFeedback=null;
 	int rowNum=1, colNum=0;
 	if (maxRowNum==0) {//wenn der resultset leer ist...
 		for (colNum=0; colNum<rsMeta.getColumnCount() ; colNum++) {
-			resultRowsMatrix[colNum][1]="null";//... wird eine Ergebniszeile kreiert, und alle Felder enthalten das Wort null 
+			resultRowsMatrix[colNum][1]="null";//... wird eine Ergebniszeile kreiert, und alle Felder erhalten das Wort null 
 		}
 	}
 	else 
 		for (colNum=0; colNum<rsMeta.getColumnCount() ; colNum++) {
+		boolean isEmptyColumn = true; 	
 			String res="";
 			while (rowNum<=maxRowNum && rs.next()){
 			try{	
 				res =rs.getString(resultRowsMatrix[colNum][0]);//get result set string für ein column name
 				resultRowsMatrix[colNum][rowNum]=res;
-				if (res!=null && res.length() > 0) 
-					 resultRowsMatrix[colNum][rowNum].replaceAll("\\*", ".*");
+				if (res!=null && res.length() > 0){ 
+					isEmptyColumn=false;
+					resultRowsMatrix[colNum][rowNum].replaceAll("\\*", ".*");
+				}
 				else 
 					if (conn.getMetaData().getDatabaseProductName().toLowerCase().contains("mysql") && res!= null && res.length() == 0 )
 						//bei MySql gibt es einen Unterschied zwischen Empty String '' und null, demnach egibt die where clause a='' true wenn a='' 
-						//Bei Oracle gibt's das nicht so, Empty String wird wie null behandelt uns so ergibt a='' sie wie auch bei null unknown, und also false      
+						//Bei Oracle gibt's das nicht so, Empty String wird wie null behandelt uns so ergibt a='' wie auch bei a=null false      
 						resultRowsMatrix[colNum][rowNum]="";
 					else
 						resultRowsMatrix[colNum][rowNum]="null";
-			}catch (Exception e) {
-				logger.error("rowNum "+rowNum+" colNum "+colNum +" rs.getString(resultRowsMatrix[colNum][0]) = "+res);
-				logger.error(ErrorMessage.showStackTrace(e.getStackTrace()) );
-			}	
+				}catch (Exception e) {
+					logger.error("rowNum "+rowNum+" colNum "+colNum +" rs.getString(resultRowsMatrix[colNum][0]) = "+res);
+					logger.error(ErrorMessage.showStackTrace(e.getStackTrace()) );
+				}	
 				//System.out.println(resultRowsMatrix[colNum][rowNum]+" "+(colNum)+" "+rowNum);
-				rowNum++;}
+				rowNum++;
+			}
+			if (isEmptyColumn)
+				this.isColumnNull.put(resultRowsMatrix[colNum][0], true);
 			rs.beforeFirst();	
 			rowNum=1;
 		}
@@ -567,7 +590,6 @@ String getDisplayData=null,SQLExecutionFeedback=null;
 	rs.close();
 	conn.createStatement().execute("drop table "+tempTable);
 	this.setResultRowsMatrix(resultRowsMatrix);
-	
 	}catch (SQLException sq) {
 	ErrorMessage.showException("Database vendor thrown an error while executing the query:\n"+getDisplayData+"\n"+sq.getMessage()+"\n"+ErrorMessage.showStackTrace(sq.getStackTrace()));
 logger.error("Database thrown error while executing the query:\n"+getDisplayData+"\n"+sq.getMessage()+"\n"+ErrorMessage.showStackTrace(sq.getStackTrace()));
@@ -584,12 +606,14 @@ boolean hasData (){
 
 static String generateTempTable(Connection conn, AnfragePlan anfrage) {
 	String tempTableName="";
+	PreparedStatement stmnt = null;
 	try{
 		DatabaseMetaData db = conn.getMetaData();
 		String colName;
 		if (conn.getMetaData().getDatabaseProductName().toLowerCase()
 				.contains("oracle"))//create a temporary table in Oracle
 		{
+			anfrage.db="Oracle";
 			String[] types ={"TABLE"};
 			ResultSet rs= db.getTables(null, db.getUserName(), "XVW$%",types);
 			int tabCounter=1;
@@ -598,7 +622,7 @@ static String generateTempTable(Connection conn, AnfragePlan anfrage) {
 			}rs.close();
 			tempTableName="XVW$"+tabCounter+anfrage.sqlQueryLabel.replace(" ", "_").replace(".", "pkt").toUpperCase();
 			if (tempTableName.length()>30) tempTableName=tempTableName.substring(0,29);
-			PreparedStatement stmnt =conn.prepareStatement("create global temporary table "+tempTableName+ " as select * from ("+anfrage.sqlQuery+"\n)a where 1=0");
+			stmnt =conn.prepareStatement("create global temporary table "+tempTableName+ " as select * from ("+anfrage.sqlQuery+"\n)a where 1=0");
 			stmnt.execute();
 			logger.debug("Created temporary table "+tempTableName);
 			DataJumper.createdTables.add(tempTableName);
@@ -613,11 +637,12 @@ static String generateTempTable(Connection conn, AnfragePlan anfrage) {
 		
 		if (conn.getMetaData().getDatabaseProductName().toLowerCase().contains("mysql"))//create a temporary table in mysql
 		{
+			anfrage.db="MySql";
 			String[] types ={"TABLE"};
 			ResultSet rs= db.getTables(null, db.getUserName(), "XVW$%",types);
 			tempTableName="XVW$"+anfrage.sqlQueryLabel.replace(" ", "_").replace(".", "pkt").toUpperCase();
 			if (tempTableName.length()>30) tempTableName=tempTableName.substring(0,29);
-			PreparedStatement stmnt =conn.prepareStatement("create temporary table "+tempTableName+ " as select * from ("+anfrage.sqlQuery+"\n)a where 1=0");
+			stmnt =conn.prepareStatement("create temporary table "+tempTableName+ " as select * from ("+anfrage.sqlQuery+"\n)a where 1=0");
 			stmnt.execute();
 			logger.debug("Created temporary table "+tempTableName);
 			DataJumper.createdTables.add(tempTableName);
@@ -637,7 +662,7 @@ static String generateTempTable(Connection conn, AnfragePlan anfrage) {
 		
 	}catch (SQLException sq) {
 		ErrorMessage.showException(sq,"Database thrown error while executing the query "+anfrage.sqlQueryLabel+":\n"+anfrage.sqlQuery+"\n");
-		logger.error("Database thrown error while executing the query:\n"+anfrage.sqlQueryLabel+":\n"+anfrage.sqlQuery+"\n"+sq.getMessage()+"\n"+ErrorMessage.showStackTrace(sq.getStackTrace()));
+		logger.error("Database thrown error while executing the query:\n"+anfrage.sqlQueryLabel+":\n"+stmnt.toString()+"\n"+sq.getMessage()+"\n"+ErrorMessage.showStackTrace(sq.getStackTrace()));
 		DBConnections.dropAllTempTables();
 		tempTableName = null;
 	}

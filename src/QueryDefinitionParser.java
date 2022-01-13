@@ -431,6 +431,7 @@ protected static Document getXmlDocument(String filePath) {
 		if (  anfrageCounter==1 && executeOnFirstRun!=null && (executeOnFirstRun.trim().equals("FALSE")||executeOnFirstRun.trim().equals("NO")||executeOnFirstRun.trim().equals("0")||executeOnFirstRun.trim().equals("-1")) ) 
 //			validationComments.append("Die erste Anfragedefinition darf keiner anderen Anfragedefinition untergeordnet werden.\nLöschen Sie den XML-tag SuperSQLQuery aus der Anfragedefinition "+queryLabel+"\n\n");
 			validationComments.append("The option executeOnFirstRun cannot be diabled for the very first report entity.\nRemove the option executeOnFirstRun or set the value to \"true\" in the report entity "+queryLabel+"\n\n");
+		
 	
 		if (  anfrageCounter>1 
 			   && queryDef.get("SUPERSQLQUERY")!=null 
@@ -462,6 +463,7 @@ protected static Document getXmlDocument(String filePath) {
 			String executeOnFirstRun = queryDef.get("EXECUTEONFIRSTRUN");
 			String suppressDisplayIfNoData = queryDef.get("SUPPRESSDISPLAYIFNODATA"); 
 			String maximumResultRows = queryDef.get("MAXRESULTROWS");
+			String emptyColumnDisplayMode = queryDef.get("EMPTYCOLUMNDISPLAYMODE");
 
 			AnfragePlan superQuery=null;
 			int maxInheritanceDepth=10000;
@@ -500,6 +502,11 @@ protected static Document getXmlDocument(String filePath) {
 				result.get(result.size()-1).setMaximumResultRows (new Integer(maximumResultRows));
 			else 
 				result.get(result.size()-1).setMaximumResultRows (10000);
+			
+			if (emptyColumnDisplayMode!= null)
+				result.get(result.size()-1).setEmptyColumnDisplayMode(emptyColumnDisplayMode.replaceAll(" ", ""));
+			else 
+				result.get(result.size()-1).setEmptyColumnDisplayMode("NOSUPPRESS");
 			
 			if (queryDef.get("SUBQUERYLOCATOR")!=null){
 				AnfragePlan parentQuery= result.get(result.size()-1);

@@ -1,6 +1,7 @@
 import java.util.*;
 
 import javax.swing.tree.*;
+
 class DataNode {
 	private DataNode parent;
 	private LinkedList<DataNode> children = new LinkedList<DataNode>();
@@ -9,7 +10,11 @@ class DataNode {
 	private String[] valueArray, resultValueArray;
 	private String[] columnArray, resultColumnArray;	
 	int childNumber; //Ordinalzahl. Gibt die Position des Nodes als Kind innerhalb der Kinderliste an. 0 ist das erste Kind 
-	Map<String,Integer> maxColumnLength;
+	private Map<String,Integer> maxColumnLength;
+	private Map<String,Boolean> isColumnNull;
+	boolean allColumnsAreNull;
+	
+
 	boolean isLabel, queryOnDemand;
 	AnfragePlan anfrage;
 
@@ -120,7 +125,9 @@ class DataNode {
 	}
 	DataNode getFirstChild(){
 		LinkedList<DataNode> children = this.getChildren();
-		return children.getFirst();
+		if (children.size()>0)
+			return children.getFirst();
+		else return null;		
 	}
 
 	DataNode insertOnLevel(DataNode child) {
@@ -142,6 +149,9 @@ class DataNode {
 	}
 	public Map<String, Integer> getMaxColumnLength() {
 		return maxColumnLength;
+	}
+	public Map<String, Boolean> getIsColumnNull() {
+		return isColumnNull;
 	}
 //	public void determinetMaxColumnLengthOld(DataNode node) {//ermittelt die längste Zeichenkette in jeder Spalte für jede Menge von Ergebniszeilen, die an einem Knoten/Label hängen
 ////		DisplayData.showTree(this, 0);
@@ -186,37 +196,93 @@ class DataNode {
 //		}				
 //	}
 
-void determineMaxColumnLength(DataNode node){		
+void setNodeBranchInfo(DataNode node){		
 		if (node.children!=null ){
 		 for (DataNode kindchen:node.children)//Preorder Baumdurchlauf
-				determineMaxColumnLength(kindchen);
+				setNodeBranchInfo(kindchen);
 		 }
+	boolean omitNullColumns=false;
+	Map<String,Boolean> isColumnNullOnBranch = new HashMap<String,Boolean>(); 
+	if (this.viewOption.equals("detailed") && node.anfrage.getEmptyColumnDisplayMode() != null && node.anfrage.getEmptyColumnDisplayMode().equals("SUPPRESSBRANCHLEVEL")
+			)
+		omitNullColumns=true;
+	else 
+		omitNullColumns=false;
 			
 	if (!node.isLabel){ 
+		String[] resultColumnArray = node.getColumnArray(true); 
 		if (node.getChildNumber()==0 )//Der Node ist das erste Kind seines Parents
 		{
-			//System.out.print("Erster!!!!!");
 			Map<String,Integer> columnsWidth = new HashMap<String,Integer>();//diese Map wird den Wert der längsten Zeichenkette pro Spalte tragen. Dieses Objekt wird an jedem der Kinder eines labels in die Variable maxColumnLength eingehakt     
-			String[] columnArray = node.getColumnArray(true); 
-			for (int t=0; t<columnArray.length; t++){
+			for (int t=0; t<resultColumnArray.length; t++){
 				columnsWidth.put(
-						columnArray[t], 
-						Math.max(columnArray[t].length(), node.getValueArray(true)[t].length()) 
-						);//die Map wird mit den Maximalwerten zwischen columnName und Value gefüllt. Falls es nur eine Ergebnisszeile gibt, enthält diese Map schon die Maximalwerte   
+						resultColumnArray[t], 
+						Math.max(resultColumnArray[t].length(), node.getValueArray(true)[t].length()) 
+						);//die Map wird mit den Maximalwerten zwischen columnName und Value gefüllt. Falls es nur eine Ergebnisszeile gibt, enthält diese Map schon die Maximalwerte
+				//logger.debug("");
+				if(omitNullColumns && (node.getValueArray(true)[t] == null || node.getValueArray(true)[t].equals("null")||node.getValueArray(true)[t].length()==0)){
+					isColumnNullOnBranch.put(
+							resultColumnArray[t], 
+							true 
+							);
+					node.allColumnsAreNull=true;
+					}
+				else {
+					isColumnNullOnBranch.put(
+							resultColumnArray[t], 
+							false 
+							);
+					node.allColumnsAreNull=false;
+				}
 			}
-			node.maxColumnLength=columnsWidth;//Map wird an die Objektvariable dieses ersten DatenKnotens eingehakt (als Startwert), Es wird sich dieses Objekt mit ihren Brüderknoten teilen	
+			node.maxColumnLength=columnsWidth;//Map wird an die Objektvariable dieses ersten DatenKnotens eingehakt (als Startwert), Es wird sich dieses Objekt mit ihren Brüderknoten teilen
+			if (omitNullColumns)
+				node.isColumnNull = isColumnNullOnBranch;
 		}
 		else {//der node ist nicht erste das Kind  
-			node.maxColumnLength = node.getParent().getChildren().get(node.getChildNumber()-1).maxColumnLength; //also bildet es ein Link zum maxColumnLength-Objekt des ersten Kindes  
-			String[] columnArray = node.getColumnArray(true); 
-			for (int t=0; t<columnArray.length; t++){//...und macht dann den Längen-Vergleich zwischen seinem String und dem bisher längsten String, und zwar für jede Spalte. 
+			node.maxColumnLength = node.getParent().getChildren().get(node.getChildNumber()-1).maxColumnLength; //also bildet es ein Link zum maxColumnLength-Objekt des ersten Kindes
+			if (omitNullColumns)
+				node.isColumnNull = node.getParent().getChildren().get(node.getChildNumber()-1).isColumnNull;
+			for (int t=0; t<resultColumnArray.length; t++){//...und macht dann den Längen-Vergleich zwischen seinem String und dem bisher längsten String, und zwar für jede Spalte. 
 				node.maxColumnLength.put(
-						columnArray[t], 
-						Math.max(node.maxColumnLength.get(columnArray[t]), node.getValueArray(true)[t].length()) );
+						resultColumnArray[t], 
+						Math.max(node.maxColumnLength.get(resultColumnArray[t]), node.getValueArray(true)[t].length()) );
+				if(omitNullColumns && node.isColumnNull.get(resultColumnArray[t]) && (node.getValueArray(true)[t] != null && !node.getValueArray(true)[t].equals("null") )){
+					node.isColumnNull.put(
+								resultColumnArray[t], 
+								false
+								);
+					node.allColumnsAreNull=false;
+				}
 			}
-		}			
+		}
+
 	}
+	if(node.isLabel && !node.getFirstChild().isLabel && omitNullColumns) {//die Kinder haben innerhalb der branch ermittelt, ob leere Felder existieren. Wenn es nun leere Felder gibt, müssen sie aus den Liste resultValueArray und resultColumnArray entfernt werden
+		propagateNullColumnOption(node);
+	}	
 }	
+
+private void propagateNullColumnOption(DataNode node){
+	if (node.children!=null && !node.getFirstChild().isLabel){
+		 for (DataNode kindchen:node.children){
+			boolean isResultColumnChange=false;
+			for (int t=0; t<kindchen.columnArray.length; t++){
+				if (kindchen.isColumnNull.get(kindchen.columnArray[t]) != null && kindchen.isColumnNull.get(kindchen.columnArray[t])){
+					kindchen.isResultColumn[t]=false;
+					isResultColumnChange=true;
+				}
+			}
+			if (isResultColumnChange){
+				kindchen.setValueArray(true);
+				kindchen.setColumnArray(true);
+			}
+		 }
+	}
+
+	
+	
+}
 	
 	public String[] getValueArray() {return valueArray;}
 	
@@ -226,7 +292,7 @@ void determineMaxColumnLength(DataNode node){
 	return this.resultValueArray; 
 	}
 	
-	private void setValueArray(boolean resultSetColumnsOnly) {//only user selected columns are selected
+	private void setValueArray(boolean resultSetColumnsOnly) {//only user choosen columns are considered
 
 	if(this.isResultColumn==null){
 	this.isResultColumn= new boolean[valueArray.length];
