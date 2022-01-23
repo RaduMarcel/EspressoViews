@@ -32,11 +32,10 @@ To check the version of your Java Runtime type in the command line:
 ```
 java -version
 ```
-If the version is lower than 1.8 or your system does not have Java then please download and install a newer Java version (https://java.com/de/download/). 
 If you know that you have the right version but the Java executable was not found from the command line, then make sure the Java PATH system variable is set correctly (see more: https://www.java.com/en/download/help/path.xml).
 
 
-Then download the EspressoViews file `EspressoViews.zip` and unpack it in an own folder. The application is started either by double-klicking Java runnable file `EspressoViews.jar` or by typing in the command line 
+Then download the EspressoViews file `EspressoViews.zip` and unpack it in an own folder. No further installation steps are required. The application is started either by double-klicking Java runnable file `EspressoViews.jar` or by typing in the command line 
 ```
 java -jar EspressoViews.jar
 ```
@@ -54,14 +53,14 @@ This definition file is made of your SQLs queries and of instructions, which spe
 [ReportDef]: https://github.com/RaduMarcel/EspressoViews-/wiki/3.-Defining-an-EspressoViews-report
 [ReportSyntax]: https://github.com/RaduMarcel/EspressoViews-/wiki/4.-The-XML-report-definition-syntax
 
-**3. The connection credentials for a (Oracle or MySQL) database server**
+**3. Connection credentials for a (Oracle or MySQL) database server**
 
 As of now this tool supports Oracle and MySQL.
 
-The `EspressoViews.zip` file contains the JDBC driver packages for the suported database server. They are placed in the folder `EspressoViews_vx.xx_lib`. The provided JDBC diver for Oracle databases works at least with the Oracle Versions between 12.1 and 21.1 and the JDBC driver for MySQL databases works at least with the MySQL versions 5.6, 5.7 and 8.0.
+The `EspressoViews.zip` file contains the JDBC driver packages for Oracle and MySQL database server. They are placed in the folder `EspressoViews_vx.xx_lib`. The provided JDBC diver for Oracle databases works at least with the Oracle Versions between 12.1 and 21.1 and the JDBC driver for MySQL databases works at least with the MySQL versions 5.6, 5.7 and 8.0.
 
 These drivers can be also downloaded from internet and you should do so if the version provided is not compatible with the database system version you try to access.
-In that case replace or add the downloaded JDBC driver package in the EspressoViews_vx.xx_lib folder, then open the MANIFEST.MF file of the `EspressoViews.jar` package and then replace the current driver package file name with  new driver package file name in the class path defintion (for instance replace ojdbc8.jar with ojdbc10.jar).  
+In that case replace or add the downloaded JDBC driver package in the EspressoViews_vx.xx_lib folder, then open the MANIFEST.MF file of the `EspressoViews.jar` package and then replace the current driver package file name with  new driver package file name in the class path defintion (for instance replace the file name ojdbc8.jar with ojdbc10.jar).  
 
 
 **4. Press the OK Button on the bottom to generate the report**
