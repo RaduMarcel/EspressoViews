@@ -32,7 +32,7 @@ To check the version of your Java Runtime type in the command line:
 ```
 java -version
 ```
-If you know that you have the right version but the Java executable was not found from the command line, then make sure the Java PATH system variable is set correctly (see more: https://www.java.com/en/download/help/path.xml).
+If you have the right Java version but the Java executable was not found from the command line, then make sure the Java PATH system variable is set correctly (see more: https://www.java.com/en/download/help/path.xml).
 
 
 Then download the EspressoViews file `EspressoViews.zip` and unpack it in an own folder. No further installation steps are required. The application is started either by double-klicking Java runnable file `EspressoViews.jar` or by typing in the command line 
@@ -57,7 +57,7 @@ This definition file is made of your SQLs queries and of instructions, which spe
 
 As of now this tool supports Oracle and MySQL.
 
-The `EspressoViews.zip` file contains the JDBC driver packages for Oracle and MySQL database server. They are placed in the folder `EspressoViews_vx.xx_lib`. The provided JDBC diver for Oracle databases works at least with the Oracle Versions between 12.1 and 21.1 and the JDBC driver for MySQL databases works at least with the MySQL versions 5.6, 5.7 and 8.0.
+The `EspressoViews.zip` file contains the JDBC driver packages for Oracle and MySQL database server. They are placed in the folder `EspressoViews_vx.xx_lib`. The provided JDBC driver for Oracle databases works at least with the Oracle Versions between 12.1 and 21.1 and the JDBC driver for MySQL databases works at least with the MySQL versions 5.6, 5.7 and 8.0.
 
 These drivers can be also downloaded from internet and you should do so if the version provided is not compatible with the database system version you try to access.
 In that case replace or add the downloaded JDBC driver package in the EspressoViews_vx.xx_lib folder, then open the MANIFEST.MF file of the `EspressoViews.jar` package and then replace the current driver package file name with  new driver package file name in the class path defintion (for instance replace the file name ojdbc8.jar with ojdbc10.jar).  
